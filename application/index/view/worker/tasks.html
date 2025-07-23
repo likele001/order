@@ -1,0 +1,48 @@
+{include file="common/header" /}
+<div class="max-w-2xl mx-auto mt-6 mb-8 px-2">
+  <h2 class="text-2xl font-bold mb-4 flex items-center text-primary"><i class="fa fa-tasks mr-2"></i> 我的任务</h2>
+  {empty name="tasks"}
+    <div class="bg-white rounded-lg shadow p-8 flex flex-col items-center mt-12">
+      <i class="fa fa-inbox fa-3x text-gray-300 mb-4"></i>
+      <p class="text-gray-500 text-lg">暂无任务</p>
+    </div>
+  {/empty}
+  <div class="space-y-4">
+    {volist name="tasks" id="task"}
+      <div class="bg-white rounded-lg shadow p-4 flex flex-col md:flex-row md:items-center md:justify-between transition hover:shadow-lg">
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-2">
+            <span class="font-semibold text-gray-700">订单号：</span>
+            <span class="text-gray-900">{$task.order_no|default=$task.order_id}</span>
+            <span class="font-semibold text-gray-700 ml-4">产品：</span>
+            <span class="text-gray-900">{$task.product_name|default='-'}</span>
+            <span class="font-semibold text-gray-700 ml-4">型号：</span>
+            <span class="text-gray-900">{$task.model_name|default='-'}</span>
+          </div>
+          <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm mb-2">
+            <span class="font-semibold text-gray-700">工序：</span>
+            <span class="text-gray-900">{$task.process_name|default=$task.process_id}</span>
+            <span class="font-semibold text-gray-700 ml-4">分配数量：</span>
+            <span class="text-gray-900">{$task.quantity}</span>
+            <span class="font-semibold text-gray-700 ml-4">已报：</span>
+            <span class="text-gray-900">{$task.reported_quantity|default=0}</span>
+            <span class="font-semibold text-gray-700 ml-4">待报：</span>
+            <span class="text-primary font-bold">{$task.remaining_quantity|default=$task.quantity}</span>
+          </div>
+          <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 mb-2">
+            <span>状态：<span class="{if $task.status==0}text-yellow-500{elseif $task.status==1}text-green-600{else}text-gray-400{/if}">{if $task.status==0}进行中{elseif $task.status==1}已完成{else}未知{/if}</span></span>
+            <span class="ml-4">创建：{$task.createtime|date='Y-m-d H:i',###}</span>
+            <span class="ml-4">更新：{$task.updatetime|date='Y-m-d H:i',###}</span>
+          </div>
+        </div>
+        <div class="mt-4 md:mt-0 md:ml-6 flex-shrink-0 flex flex-col items-end">
+          <a href="{:url('worker/report', ['id'=>$task.id])}" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-bold text-base w-full md:w-auto justify-center">
+            <i class="fa fa-edit mr-2"></i> 报工
+          </a>
+          <span class="text-xs text-gray-400 mt-2">待报数量：{$task.remaining_quantity|default=$task.quantity}</span>
+        </div>
+      </div>
+    {/volist}
+  </div>
+</div>
+{include file="common/footer" /} 

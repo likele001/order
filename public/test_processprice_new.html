@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProcessPrice模块测试页面（新版本）</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            console.log('开始测试重新创建的ProcessPrice模块...');
+            
+            // 测试文件是否存在
+            var files = [
+                '/assets/js/backend/scanwork/processprice.js',
+                '/application/admin/controller/scanwork/ProcessPrice.php',
+                '/application/admin/model/scanwork/ProcessPrice.php',
+                '/application/admin/view/scanwork/processprice/index.html',
+                '/application/admin/view/scanwork/processprice/add.html',
+                '/application/admin/view/scanwork/processprice/edit.html'
+            ];
+            
+            var testResults = [];
+            
+            files.forEach(function(file, index) {
+                $.get(file)
+                    .done(function() {
+                        console.log('✓ ' + file + ' 存在');
+                        testResults.push('<div class="success">✓ ' + file + ' 存在</div>');
+                    })
+                    .fail(function() {
+                        console.log('✗ ' + file + ' 不存在');
+                        testResults.push('<div class="error">✗ ' + file + ' 不存在</div>');
+                    })
+                    .always(function() {
+                        if (index === files.length - 1) {
+                            $('#file-results').html(testResults.join(''));
+                        }
+                    });
+            });
+            
+            // 测试URL访问
+            var testUrls = [
+                '/lsj5492li.php/scanwork/processprice',
+                '/lsj5492li.php/scanwork/processprice/index',
+                '/lsj5492li.php/scanwork/processprice/add',
+                '/lsj5492li.php/scanwork/processprice?ref=addtabs'
+            ];
+            
+            var urlResults = [];
+            testUrls.forEach(function(url, index) {
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    timeout: 10000,
+                    success: function(data, status, xhr) {
+                        console.log('✓ ' + url + ' - 成功');
+                        urlResults.push('<div class="success">✓ ' + url + ' - 成功</div>');
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('✗ ' + url + ' - 失败: ' + xhr.status);
+                        urlResults.push('<div class="error">✗ ' + url + ' - 失败: ' + xhr.status + ' ' + xhr.statusText + '</div>');
+                    },
+                    complete: function() {
+                        if (index === testUrls.length - 1) {
+                            $('#url-results').html(urlResults.join(''));
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; margin: 5px 0; }
+        .error { color: red; margin: 5px 0; }
+        .test-section { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+        .test-section h3 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>ProcessPrice模块测试页面（新版本）</h1>
+    <p>此页面用于测试重新创建的工序工价管理模块。</p>
+    
+    <div class="test-section">
+        <h3>文件存在性测试：</h3>
+        <div id="file-results">测试中...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>URL访问测试：</h3>
+        <div id="url-results">测试中...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>直接链接测试：</h3>
+        <p><a href="/lsj5492li.php/scanwork/processprice?ref=addtabs" target="_blank">点击这里直接访问工序工价管理页面</a></p>
+        <p><a href="/lsj5492li.php/scanwork/processprice/add" target="_blank">点击这里访问添加工序工价页面</a></p>
+    </div>
+    
+    <div class="test-section">
+        <h3>模块功能说明：</h3>
+        <ul>
+            <li><strong>列表页面</strong>：显示所有工序工价，支持搜索、排序、分页</li>
+            <li><strong>添加功能</strong>：添加新的工序工价设置</li>
+            <li><strong>编辑功能</strong>：修改现有工序工价</li>
+            <li><strong>删除功能</strong>：删除工序工价记录</li>
+            <li><strong>批量设置</strong>：为指定型号批量设置所有工序的工价</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h3>数据表结构：</h3>
+        <p>表名：<code>fa_scanwork_process_price</code></p>
+        <ul>
+            <li><code>id</code> - 主键ID</li>
+            <li><code>model_id</code> - 型号ID（关联产品型号表）</li>
+            <li><code>process_id</code> - 工序ID（关联工序表）</li>
+            <li><code>price</code> - 工价（元/件）</li>
+            <li><code>status</code> - 状态（1=正常，0=禁用）</li>
+            <li><code>createtime</code> - 创建时间</li>
+            <li><code>updatetime</code> - 更新时间</li>
+        </ul>
+    </div>
+</body>
+</html> 

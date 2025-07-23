@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>会员中心 - 工厂报工系统</title>
+{include file="common/header" /}
+
+<div class="max-w-7xl mx-auto">
+    <!-- 欢迎卡片 -->
+    <div class="bg-white rounded-lg shadow-lg p-8 mb-8 text-center">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">
+            <i class="fa fa-user text-primary mr-2"></i> 欢迎，{$worker.nickname}
+        </h3>
+        <p class="text-gray-600 mb-8">今天是 {:date('Y年m月d日')}，祝您工作愉快！</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
+                <div class="text-3xl font-bold mb-2" id="today-tasks">{$todayTaskCount|default=0}</div>
+                <div class="text-blue-100">今日任务</div>
+            </div>
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-white">
+                <div class="text-3xl font-bold mb-2" id="today-reports">{$todayReportCount|default=0}</div>
+                <div class="text-green-100">今日报工</div>
+            </div>
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-6 text-white">
+                <div class="text-3xl font-bold mb-2" id="today-wage">¥{$todayWage|default='0.00'}</div>
+                <div class="text-purple-100">今日工资</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 功能菜单 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <a href="{:url('worker/tasks')}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-center group">
+            <div class="text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">
+                <i class="fa fa-tasks"></i>
+            </div>
+            <div class="text-xl font-bold text-gray-800 mb-2">我的任务</div>
+            <div class="text-gray-600">查看分配给您的生产任务</div>
+        </a>
+        
+        <a href="{:url('worker/report')}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-center group">
+            <div class="text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">
+                <i class="fa fa-plus-circle"></i>
+            </div>
+            <div class="text-xl font-bold text-gray-800 mb-2">报工</div>
+            <div class="text-gray-600">提交生产报工记录</div>
+        </a>
+        
+        <a href="{:url('worker/scan')}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-center group">
+            <div class="text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">
+                <i class="fa fa-qrcode"></i>
+            </div>
+            <div class="text-xl font-bold text-gray-800 mb-2">扫码报工</div>
+            <div class="text-gray-600">扫描二维码快速报工</div>
+        </a>
+        
+        <a href="{:url('worker/records')}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-center group">
+            <div class="text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">
+                <i class="fa fa-list-alt"></i>
+            </div>
+            <div class="text-xl font-bold text-gray-800 mb-2">报工记录</div>
+            <div class="text-gray-600">查看历史报工记录</div>
+        </a>
+        
+        <a href="{:url('worker/wage')}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-center group">
+            <div class="text-4xl text-primary mb-4 group-hover:scale-110 transition-transform">
+                <i class="fa fa-money"></i>
+            </div>
+            <div class="text-xl font-bold text-gray-800 mb-2">工资统计</div>
+            <div class="text-gray-600">查看工资统计和明细</div>
+        </a>
+        
+        <a href="{:url('user/logout')}" class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 text-center group">
+            <div class="text-4xl text-red-500 mb-4 group-hover:scale-110 transition-transform">
+                <i class="fa fa-sign-out"></i>
+            </div>
+            <div class="text-xl font-bold text-gray-800 mb-2">退出登录</div>
+            <div class="text-gray-600">安全退出系统</div>
+        </a>
+    </div>
+
+    <!-- 快速操作 -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-6">
+            <i class="fa fa-bolt text-primary mr-2"></i> 快速操作
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button onclick="location.href='{:url(\'worker/tasks\')}'" class="bg-primary hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                <i class="fa fa-tasks mr-2"></i> 查看任务
+            </button>
+            <button onclick="location.href='{:url(\'worker/scan\')}'" class="bg-green-500 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center">
+                <i class="fa fa-qrcode mr-2"></i> 扫码报工
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script>
+// 首页统计卡片已由后端渲染，无需JS异步加载
+</script>
+
+{include file="common/footer" /} 

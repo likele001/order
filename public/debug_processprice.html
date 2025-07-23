@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProcessPrice调试页面</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            console.log('开始调试ProcessPrice模块...');
+            
+            // 测试不同的URL格式
+            var testUrls = [
+                '/lsj5492li.php/scanwork/processprice',
+                '/lsj5492li.php/scanwork/processprice/index',
+                '/lsj5492li.php/scanwork/processprice/index?addtabs=1',
+                '/lsj5492li.php/scanwork/processprice?ref=addtabs',
+                '/lsj5492li.php/admin/scanwork/processprice',
+                '/lsj5492li.php/admin/scanwork/processprice/index'
+            ];
+            
+            testUrls.forEach(function(url, index) {
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    timeout: 10000,
+                    success: function(data, status, xhr) {
+                        console.log('✓ ' + url + ' - 成功');
+                        $('#results').append('<div class="success">✓ ' + url + ' - 成功</div>');
+                    },
+                    error: function(xhr, status, error) {
+                        console.log('✗ ' + url + ' - 失败: ' + xhr.status + ' ' + xhr.statusText);
+                        $('#results').append('<div class="error">✗ ' + url + ' - 失败: ' + xhr.status + ' ' + xhr.statusText + '</div>');
+                        
+                        // 如果是404错误，尝试获取更多信息
+                        if (xhr.status === 404) {
+                            $.get(url, function(data) {
+                                // 这个请求应该会失败，但我们可以看看响应内容
+                            }).fail(function(xhr) {
+                                if (xhr.responseText) {
+                                    $('#results').append('<div class="info">响应内容: ' + xhr.responseText.substring(0, 200) + '...</div>');
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // 检查文件是否存在
+            $.get('/assets/js/backend/scanwork/processprice.js')
+                .done(function() {
+                    $('#file-check').html('<div class="success">✓ JS文件存在</div>');
+                })
+                .fail(function() {
+                    $('#file-check').html('<div class="error">✗ JS文件不存在</div>');
+                });
+        });
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; margin: 5px 0; }
+        .error { color: red; margin: 5px 0; }
+        .info { color: blue; margin: 5px 0; font-size: 12px; }
+        #results { margin-top: 20px; padding: 10px; border: 1px solid #ccc; max-height: 400px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>ProcessPrice模块调试页面</h1>
+    <p>此页面将测试不同的URL格式来找出问题所在。</p>
+    
+    <h3>JS文件检查：</h3>
+    <div id="file-check">检查中...</div>
+    
+    <h3>URL测试结果：</h3>
+    <div id="results"></div>
+    
+    <h3>测试的URL列表：</h3>
+    <ul>
+        <li>/lsj5492li.php/scanwork/processprice</li>
+        <li>/lsj5492li.php/scanwork/processprice/index</li>
+        <li>/lsj5492li.php/scanwork/processprice/index?addtabs=1</li>
+        <li>/lsj5492li.php/scanwork/processprice?ref=addtabs</li>
+        <li>/lsj5492li.php/admin/scanwork/processprice</li>
+        <li>/lsj5492li.php/admin/scanwork/processprice/index</li>
+    </ul>
+    
+    <h3>可能的问题：</h3>
+    <ul>
+        <li>权限未设置 - 需要执行权限SQL</li>
+        <li>路由配置问题</li>
+        <li>控制器类名问题</li>
+        <li>FastAdmin配置问题</li>
+    </ul>
+    
+    <h3>建议的解决方案：</h3>
+    <ol>
+        <li>执行权限SQL文件：<code>source install_permissions.sql;</code></li>
+        <li>检查FastAdmin后台权限设置</li>
+        <li>清除缓存：删除runtime/cache/目录</li>
+        <li>检查日志文件：runtime/log/</li>
+    </ol>
+</body>
+</html> 

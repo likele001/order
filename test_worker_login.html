@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工登录测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+</head>
+<body>
+    <div style="max-width: 400px; margin: 50px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <h2>员工登录测试</h2>
+        <form id="login-form">
+            <div style="margin-bottom: 15px;">
+                <label>用户名/邮箱/手机：</label>
+                <input type="text" id="account" name="account" value="lsj5492" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>密码：</label>
+                <input type="password" id="password" name="password" value="123456" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label>
+                    <input type="checkbox" name="keeplogin" value="1" checked> 保持登录
+                </label>
+            </div>
+            <button type="submit" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">登录</button>
+        </form>
+        
+        <div id="result" style="margin-top: 20px; padding: 10px; border-radius: 4px;"></div>
+        
+        <div style="margin-top: 20px;">
+            <button onclick="testTasks()" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">测试任务列表</button>
+            <button onclick="window.location.href='/index/worker/tasks.html'" style="padding: 8px 16px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">直接访问任务页面</button>
+        </div>
+    </div>
+
+    <script>
+        $('#login-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            var formData = {
+                account: $('#account').val(),
+                password: $('#password').val(),
+                keeplogin: $('input[name="keeplogin"]:checked').val(),
+                __token__: 'test_token'
+            };
+            
+            $.post('/index/user/login', formData, function(data) {
+                console.log('Login response:', data);
+                if (data.code === 1) {
+                    $('#result').html('<div style="background: #d4edda; color: #155724; padding: 10px; border-radius: 4px;">登录成功！正在跳转...</div>');
+                    setTimeout(function() {
+                        window.location.href = data.url || '/index/worker/tasks.html';
+                    }, 1000);
+                } else {
+                    $('#result').html('<div style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px;">登录失败：' + (data.msg || '未知错误') + '</div>');
+                }
+            }).fail(function(xhr, status, error) {
+                console.error('Login error:', error);
+                $('#result').html('<div style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px;">网络错误：' + error + '</div>');
+            });
+        });
+        
+        function testTasks() {
+            $.get('/index/worker/tasks', function(data) {
+                console.log('Tasks response:', data);
+                if (data.code === 1) {
+                    $('#result').html('<div style="background: #d4edda; color: #155724; padding: 10px; border-radius: 4px;">任务列表获取成功！数据条数：' + data.data.length + '</div>');
+                } else {
+                    $('#result').html('<div style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px;">任务列表获取失败：' + (data.msg || '未知错误') + '</div>');
+                }
+            }).fail(function(xhr, status, error) {
+                console.error('Tasks error:', error);
+                $('#result').html('<div style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px;">网络错误：' + error + '</div>');
+            });
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS文件测试页面</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            console.log('jQuery加载成功');
+            
+            // 测试JS文件是否存在
+            var jsFiles = [
+                '/assets/js/backend/scanwork/product.js',
+                '/assets/js/backend/scanwork/model.js',
+                '/assets/js/backend/scanwork/process.js',
+                '/assets/js/backend/scanwork/processprice.js',
+                '/assets/js/backend/scanwork/order.js',
+                '/assets/js/backend/scanwork/allocation.js',
+                '/assets/js/backend/scanwork/report.js',
+                '/assets/js/backend/scanwork/progress.js',
+                '/assets/js/backend/scanwork/qrcode.js'
+            ];
+            
+            jsFiles.forEach(function(file) {
+                $.get(file)
+                    .done(function() {
+                        console.log('✓ ' + file + ' 存在');
+                        $('#status').append('<div class="success">✓ ' + file + ' 存在</div>');
+                    })
+                    .fail(function() {
+                        console.log('✗ ' + file + ' 不存在');
+                        $('#status').append('<div class="error">✗ ' + file + ' 不存在</div>');
+                    });
+            });
+        });
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; margin: 5px 0; }
+        .error { color: red; margin: 5px 0; }
+        #status { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h1>JS文件测试页面</h1>
+    <p>此页面用于测试工厂报工管理系统的JS文件是否正确创建。</p>
+    
+    <h2>测试结果：</h2>
+    <div id="status"></div>
+    
+    <h2>说明：</h2>
+    <ul>
+        <li>绿色 ✓ 表示文件存在且可以访问</li>
+        <li>红色 ✗ 表示文件不存在或无法访问</li>
+        <li>如果所有文件都显示绿色，说明JS文件创建成功</li>
+    </ul>
+    
+    <h2>文件路径：</h2>
+    <ul>
+        <li>/assets/js/backend/scanwork/product.js - 产品管理</li>
+        <li>/assets/js/backend/scanwork/model.js - 型号管理</li>
+        <li>/assets/js/backend/scanwork/process.js - 工序管理</li>
+        <li>/assets/js/backend/scanwork/processprice.js - 工序工价</li>
+        <li>/assets/js/backend/scanwork/order.js - 订单管理</li>
+        <li>/assets/js/backend/scanwork/allocation.js - 分工分配</li>
+        <li>/assets/js/backend/scanwork/report.js - 报工管理</li>
+        <li>/assets/js/backend/scanwork/progress.js - 生产进度</li>
+        <li>/assets/js/backend/scanwork/qrcode.js - 二维码管理</li>
+    </ul>
+</body>
+</html> 

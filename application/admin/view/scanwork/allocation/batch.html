@@ -1,0 +1,206 @@
+<form id="batch-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <input type="hidden" name="order_id" value="{$order.id}">
+    
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">订单信息：</label>
+        <div class="col-xs-12 col-sm-8">
+            <p><strong>订单号：</strong>{$order.order_no}</p>
+            <p><strong>客户：</strong>{$order.customer_name}</p>
+            <p><strong>总数量：</strong>{$order.total_quantity}</p>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">型号分配：</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="allocation-table">
+                    <thead>
+                        <tr>
+                            <th>型号</th>
+                            <th>订单数量</th>
+                            <th>工序</th>
+                            <th>员工</th>
+                            <th>分配数量</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {foreach $order.orderModels as $orderModel}
+                        <tr class="allocation-row" data-model-id="{$orderModel.model_id}">
+                            <td>
+                                {$orderModel.model.product.name} - {$orderModel.model.name}
+                                {if $orderModel.model.model_code}
+                                    ({$orderModel.model.model_code})
+                                {/if}
+                            </td>
+                            <td>
+                                <span class="order-quantity">{$orderModel.quantity}</span>
+                                <span class="allocated-quantity text-muted">(已分配: <span class="allocated-count">0</span>)</span>
+                            </td>
+                            <td>
+                                <select name="allocations[{$orderModel.model_id}][process_id]" class="form-control process-select" required>
+                                    <option value="">请选择工序</option>
+                                    {foreach $processList as $id => $name}
+                                    <option value="{$id}">{$name}</option>
+                                    {/foreach}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="allocations[{$orderModel.model_id}][user_id]" class="form-control user-select" required>
+                                    <option value="">请选择员工</option>
+                                    {foreach $userList as $id => $name}
+                                    <option value="{$id}">{$name}</option>
+                                    {/foreach}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" name="allocations[{$orderModel.model_id}][quantity]" class="form-control quantity-input" min="1" max="{$orderModel.quantity}" value="{$orderModel.quantity}" required>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-success btn-sm add-allocation-btn">添加分配</button>
+                            </td>
+                        </tr>
+                        {/foreach}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">保存分配</button>
+            <button type="reset" class="btn btn-default btn-embossed">重置</button>
+        </div>
+    </div>
+</form>
+
+<script>
+$(function() {
+    // 添加分配行
+    $(document).on('click', '.add-allocation-btn', function() {
+        var currentRow = $(this).closest('.allocation-row');
+        var modelId = currentRow.data('model-id');
+        var newRow = currentRow.clone();
+        
+        // 清空选择框和数量
+        newRow.find('select').val('');
+        newRow.find('.quantity-input').val('');
+        
+        // 更新已分配数量显示
+        updateAllocatedQuantity(modelId);
+        
+        // 插入新行
+        currentRow.after(newRow);
+    });
+    
+    // 删除分配行
+    $(document).on('click', '.remove-allocation-btn', function() {
+        var row = $(this).closest('.allocation-row');
+        var modelId = row.data('model-id');
+        
+        if ($('.allocation-row[data-model-id="' + modelId + '"]').length > 1) {
+            row.remove();
+            updateAllocatedQuantity(modelId);
+        } else {
+            Toastr.error('至少需要保留一个分配');
+        }
+    });
+    
+    // 数量输入变化时更新已分配数量
+    $(document).on('input', '.quantity-input', function() {
+        var row = $(this).closest('.allocation-row');
+        var modelId = row.data('model-id');
+        updateAllocatedQuantity(modelId);
+    });
+    
+    // 更新已分配数量显示
+    function updateAllocatedQuantity(modelId) {
+        var totalAllocated = 0;
+        $('.allocation-row[data-model-id="' + modelId + '"] .quantity-input').each(function() {
+            var quantity = parseInt($(this).val()) || 0;
+            totalAllocated += quantity;
+        });
+        
+        $('.allocation-row[data-model-id="' + modelId + '"] .allocated-count').text(totalAllocated);
+        
+        // 检查是否超过订单数量
+        var orderQuantity = parseInt($('.allocation-row[data-model-id="' + modelId + '"] .order-quantity').text());
+        if (totalAllocated > orderQuantity) {
+            $('.allocation-row[data-model-id="' + modelId + '"] .allocated-quantity').addClass('text-danger');
+        } else {
+            $('.allocation-row[data-model-id="' + modelId + '"] .allocated-quantity').removeClass('text-danger');
+        }
+    }
+    
+    // 表单提交
+    $('#batch-form').validator().on('submit', function(e) {
+        if (e.isDefaultPrevented()) {
+            return false;
+        }
+        
+        // 验证每个型号的分配数量
+        var isValid = true;
+        $('.allocation-row').each(function() {
+            var modelId = $(this).data('model-id');
+            var orderQuantity = parseInt($(this).find('.order-quantity').text());
+            var totalAllocated = 0;
+            
+            $('.allocation-row[data-model-id="' + modelId + '"] .quantity-input').each(function() {
+                var quantity = parseInt($(this).val()) || 0;
+                totalAllocated += quantity;
+            });
+            
+            if (totalAllocated > orderQuantity) {
+                Toastr.error('型号分配数量超过订单数量');
+                isValid = false;
+                return false;
+            }
+        });
+        
+        if (!isValid) {
+            return false;
+        }
+        
+        // 构建分配数据
+        var allocations = [];
+        $('.allocation-row').each(function() {
+            var modelId = $(this).data('model-id');
+            var processId = $(this).find('.process-select').val();
+            var userId = $(this).find('.user-select').val();
+            var quantity = parseInt($(this).find('.quantity-input').val()) || 0;
+            
+            if (processId && userId && quantity > 0) {
+                allocations.push({
+                    model_id: modelId,
+                    process_id: processId,
+                    user_id: userId,
+                    quantity: quantity
+                });
+            }
+        });
+        
+        if (allocations.length === 0) {
+            Toastr.error('请至少添加一个分配');
+            return false;
+        }
+        
+        // 添加隐藏字段
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'allocations',
+            value: JSON.stringify(allocations)
+        }).appendTo('#batch-form');
+        
+        return true;
+    });
+    
+    // 初始化已分配数量显示
+    $('.allocation-row').each(function() {
+        var modelId = $(this).data('model-id');
+        updateAllocatedQuantity(modelId);
+    });
+});
+</script> 

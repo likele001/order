@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务数据测试</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .task { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>任务数据测试</h1>
+    <button onclick="loadTasks()">加载任务数据</button>
+    <div id="result"></div>
+
+    <script>
+        function loadTasks() {
+            $('#result').html('正在加载...');
+            
+            $.ajax({
+                url: '/index/worker/tasks',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    console.log('成功获取数据:', data);
+                    if (data.code === 1) {
+                        var html = '<h2 class="success">数据获取成功！</h2>';
+                        html += '<p>数据条数: ' + data.data.length + '</p>';
+                        
+                        if (data.data.length > 0) {
+                            html += '<h3>任务列表:</h3>';
+                            data.data.forEach(function(task, index) {
+                                html += '<div class="task">';
+                                html += '<h4>任务 ' + (index + 1) + '</h4>';
+                                html += '<p><strong>订单号:</strong> ' + (task.order_no || 'N/A') + '</p>';
+                                html += '<p><strong>产品:</strong> ' + (task.product_name || 'N/A') + '</p>';
+                                html += '<p><strong>模型:</strong> ' + (task.model_name || 'N/A') + '</p>';
+                                html += '<p><strong>工序:</strong> ' + (task.process_name || 'N/A') + '</p>';
+                                html += '<p><strong>分配数量:</strong> ' + task.quantity + '</p>';
+                                html += '<p><strong>已报数量:</strong> ' + task.reported_quantity + '</p>';
+                                html += '<p><strong>待报数量:</strong> ' + task.remaining_quantity + '</p>';
+                                html += '</div>';
+                            });
+                        } else {
+                            html += '<p>暂无任务数据</p>';
+                        }
+                    } else {
+                        html = '<h2 class="error">数据获取失败</h2>';
+                        html += '<p>错误信息: ' + (data.msg || '未知错误') + '</p>';
+                        html += '<p>错误代码: ' + data.code + '</p>';
+                    }
+                    $('#result').html(html);
+                },
+                error: function(xhr, status, error) {
+                    console.error('请求失败:', error);
+                    console.error('状态:', status);
+                    console.error('响应:', xhr.responseText);
+                    
+                    var html = '<h2 class="error">请求失败</h2>';
+                    html += '<p>错误: ' + error + '</p>';
+                    html += '<p>状态: ' + status + '</p>';
+                    html += '<p>响应: ' + xhr.responseText + '</p>';
+                    $('#result').html(html);
+                }
+            });
+        }
+    </script>
+</body>
+</html> 

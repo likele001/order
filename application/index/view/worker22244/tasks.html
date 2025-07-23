@@ -1,0 +1,184 @@
+{include file="common/header" /}
+
+<div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">
+            <i class="fa fa-tasks text-primary mr-2"></i> 我的任务
+        </h3>
+        
+        <!-- 任务列表 -->
+        <div id="tasks-container">
+            <div class="text-center py-12">
+                <i class="fa fa-spinner fa-spin fa-3x text-primary mb-4"></i>
+                <p class="text-gray-600">正在加载任务...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 报工模态框 -->
+<div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden" id="report-modal">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">报工</h3>
+                <button type="button" class="text-gray-400 hover:text-gray-600" onclick="closeModal()">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <form id="report-form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">任务信息：</label>
+                    <div id="task-info" class="bg-gray-50 p-3 rounded text-sm"></div>
+                </div>
+                <div class="mb-4">
+                    <label for="report-quantity" class="block text-sm font-medium text-gray-700 mb-2">报工数量：</label>
+                    <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" id="report-quantity" name="quantity" min="1" required>
+                    <p class="text-xs text-gray-500 mt-1">最大可报数量：<span id="max-quantity">0</span></p>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400" onclick="closeModal()">取消</button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700">提交报工</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 使用FastAdmin自带的jQuery -->
+<script src="__CDN__/assets/libs/jquery/dist/jquery.min.js"></script>
+<script>
+// 如果本地jQuery加载失败，使用备用CDN
+if (typeof jQuery === 'undefined') {
+    document.write('<script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>');
+}
+
+$(function() {
+    console.log('jQuery loaded, version:', $.fn.jquery);
+    
+    // 加载任务列表
+    $.ajax({
+        url: '{:url("index/worker/tasks")}',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            console.log('Tasks data:', data); // 调试信息
+            if (data.code === 1) {
+                var html = '';
+                if (data.data.length === 0) {
+                    html = `
+                        <div class="text-center py-12">
+                            <i class="fa fa-inbox fa-3x text-gray-300 mb-4"></i>
+                            <p class="text-gray-500">暂无任务</p>
+                        </div>
+                    `;
+                } else {
+                    data.data.forEach(function(task) {
+                        console.log('Task:', task); // 调试信息
+                        
+                        // 确保数值正确
+                        var quantity = parseInt(task.quantity) || 0;
+                        var reportedQuantity = parseInt(task.reported_quantity) || 0;
+                        var remainingQuantity = parseInt(task.remaining_quantity) || 0;
+                        
+                        // 如果remaining_quantity未定义，手动计算
+                        if (isNaN(remainingQuantity) || remainingQuantity === undefined) {
+                            remainingQuantity = Math.max(0, quantity - reportedQuantity);
+                        }
+                        
+                        var progress = quantity > 0 ? Math.round((reportedQuantity / quantity) * 100) : 0;
+                        html += `
+                            <div class="bg-white border border-gray-200 rounded-lg p-6 mb-4 hover:shadow-md transition-shadow">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                                    <div class="flex-1 mb-4 md:mb-0">
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-2">${task.order_no || '-'} - ${task.product_name || '-'} - ${task.model_name || '-'}</h4>
+                                        <p class="text-gray-600 mb-2"><strong>工序：</strong>${task.process_name || '-'}</p>
+                                        <div class="grid grid-cols-3 gap-4 text-sm mb-3">
+                                            <div><strong>分配数量：</strong>${quantity}</div>
+                                            <div><strong>已报数量：</strong>${reportedQuantity}</div>
+                                            <div><strong>待报数量：</strong>${remainingQuantity}</div>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-primary h-2 rounded-full transition-all duration-300" style="width: ${progress}%"></div>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">进度：${progress}%</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <a href="{:url('index/worker/report')}?id=${task.id}" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                            <i class="fa fa-edit mr-2"></i> 报工
+                                        </a>
+                                        <p class="text-xs text-gray-500 mt-2">待报数量：${remainingQuantity}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                $('#tasks-container').html(html);
+            } else {
+                $('#tasks-container').html(`
+                    <div class="text-center py-12">
+                        <i class="fa fa-exclamation-triangle fa-3x text-red-500 mb-4"></i>
+                        <p class="text-red-600">加载失败：${data.msg || '未知错误'}</p>
+                        <p class="text-sm text-gray-500 mt-2">错误代码：${data.code}</p>
+                    </div>
+                `);
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('AJAX error:', error);
+            console.error('Status:', status);
+            console.error('Response:', xhr.responseText);
+            
+            var errorMsg = '网络错误，请刷新页面重试';
+            if (xhr.status === 401) {
+                errorMsg = '请先登录';
+            } else if (xhr.responseText) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    errorMsg = response.msg || errorMsg;
+                } catch (e) {
+                    errorMsg = xhr.responseText;
+                }
+            }
+            
+            $('#tasks-container').html(`
+                <div class="text-center py-12">
+                    <i class="fa fa-exclamation-triangle fa-3x text-red-500 mb-4"></i>
+                    <p class="text-red-600">${errorMsg}</p>
+                    <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-700">刷新页面</button>
+                </div>
+            `);
+        }
+    });
+    
+    // 提交报工
+    $(document).on('click', '.btn-submit-report', function() {
+        var taskId = $(this).data('id');
+        var quantity = $(this).closest('.task-item').find('.report-quantity').val();
+        
+        if (!quantity || quantity <= 0) {
+            alert('请输入有效的报工数量');
+            return;
+        }
+        
+        $.post('{:url("index/worker/submit")}', {
+            allocation_id: taskId,
+            quantity: quantity
+        }, function(data) {
+            if (data.code === 1) {
+                alert('报工成功！');
+                location.reload();
+            } else {
+                alert('报工失败：' + data.msg);
+            }
+        });
+    });
+});
+
+function closeModal() {
+    document.getElementById('report-modal').classList.add('hidden');
+}
+</script>
+
+{include file="common/footer" /} 

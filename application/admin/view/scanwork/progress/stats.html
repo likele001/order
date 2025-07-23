@@ -1,0 +1,45 @@
+<div class="panel panel-default">
+    <div class="panel-heading">进度统计</div>
+    <div class="panel-body">
+        <div id="echarts-stats" style="width:100%;height:400px;"></div>
+        <table class="table table-bordered" id="table-stats">
+            <thead><tr><th>类型</th><th>总数</th><th>进行中</th><th>已完成</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>订单</td>
+                    <td>{$orders.total|default=0}</td>
+                    <td>{$orders.in_progress|default=0}</td>
+                    <td>{$orders.completed|default=0}</td>
+                </tr>
+                <tr>
+                    <td>分配</td>
+                    <td>{$allocations.total|default=0}</td>
+                    <td>{$allocations.in_progress|default=0}</td>
+                    <td>{$allocations.completed|default=0}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="https://cdn.staticfile.org/echarts/5.4.3/echarts.min.js"></script>
+{php}
+$statsChartArr = [
+    ['type'=>'订单','total'=>$orders['total'],'in_progress'=>$orders['in_progress'],'completed'=>$orders['completed']],
+    ['type'=>'分配','total'=>$allocations['total'],'in_progress'=>$allocations['in_progress'],'completed'=>$allocations['completed']]
+];
+echo '<script>window.statsChartData = ' . json_encode($statsChartArr, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) . ';</script>';
+{/php}
+<script>
+var chart = echarts.init(document.getElementById('echarts-stats'));
+chart.setOption({
+    title: {text: '进度统计'},
+    tooltip: {},
+    legend: {data:['进行中','已完成']},
+    xAxis: {data: window.statsChartData.map(function(r){return r.type;})},
+    yAxis: {},
+    series: [
+        {name:'进行中',type:'bar',data:window.statsChartData.map(function(r){return r.in_progress;})},
+        {name:'已完成',type:'bar',data:window.statsChartData.map(function(r){return r.completed;})}
+    ]
+});
+</script> 

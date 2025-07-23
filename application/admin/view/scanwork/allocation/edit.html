@@ -1,0 +1,139 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('订单')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[order_id]', $orderList, $row.order_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required', 'id'=>'order-select'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('型号')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select name="row[model_id]" class="form-control selectpicker" data-rule="required" id="model-select">
+                <option value="">请先选择订单</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('工序')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select name="row[process_id]" class="form-control selectpicker" data-rule="required" id="process-select">
+                <option value="">请先选择型号</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('员工')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_select('row[user_id]', $userList, $row.user_id, ['class'=>'form-control selectpicker', 'data-rule'=>'required'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('工作类型')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select name="row[work_type]" class="form-control selectpicker" id="work-type-select">
+                <option value="piece" {if $row.work_type == 'piece'}selected{/if}>计件</option>
+                <option value="time" {if $row.work_type == 'time'}selected{/if}>计时</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group" id="quantity-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('分配数量')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-quantity" data-rule="required;number" class="form-control" name="row[quantity]" type="number" min="1" value="{$row.quantity}">
+            <span class="help-block">已报数量：{$row.reported_quantity}，最大可分配数量：<span id="max-quantity">0</span></span>
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+
+<script>
+$(function() {
+    // 初始化时加载型号和工序
+    var orderId = '{$row.order_id}';
+    var modelId = '{$row.model_id}';
+    var processId = '{$row.process_id}';
+    
+    if (orderId) {
+        loadModels(orderId, modelId);
+    }
+    
+    // 订单选择变化时加载型号
+    $('#order-select').change(function() {
+        var orderId = $(this).val();
+        if (orderId) {
+            loadModels(orderId);
+        } else {
+            $('#model-select').empty().append('<option value="">请先选择订单</option>').selectpicker('refresh');
+            $('#process-select').empty().append('<option value="">请先选择型号</option>').selectpicker('refresh');
+        }
+    });
+    
+    // 型号选择变化时加载工序
+    $('#model-select').change(function() {
+        var modelId = $(this).val();
+        if (modelId) {
+            loadProcesses(modelId);
+            
+            // 更新最大可分配数量
+            var selectedOption = $(this).find('option:selected');
+            var maxQuantity = selectedOption.data('quantity') || 0;
+            $('#max-quantity').text(maxQuantity);
+            $('#c-quantity').attr('max', maxQuantity);
+        } else {
+            $('#process-select').empty().append('<option value="">请先选择型号</option>').selectpicker('refresh');
+            $('#max-quantity').text('0');
+            $('#c-quantity').attr('max', 0);
+        }
+    });
+    
+    // 加载型号列表
+    function loadModels(orderId, selectedModelId) {
+        $.get('scanwork/allocation/getOrderModels', {order_id: orderId}, function(data) {
+            if (data.code === 1) {
+                var modelSelect = $('#model-select');
+                modelSelect.empty().append('<option value="">请选择型号</option>');
+                
+                data.data.forEach(function(orderModel) {
+                    var selected = (orderModel.model_id == selectedModelId) ? 'selected' : '';
+                    modelSelect.append('<option value="' + orderModel.model_id + '" data-quantity="' + orderModel.quantity + '" ' + selected + '>' + 
+                        orderModel.model.product.name + ' - ' + orderModel.model.name + ' (订单数量: ' + orderModel.quantity + ')</option>');
+                });
+                
+                modelSelect.selectpicker('refresh');
+                
+                if (selectedModelId) {
+                    loadProcesses(selectedModelId, processId);
+                }
+            }
+        });
+    }
+    
+    // 加载工序列表
+    function loadProcesses(modelId, selectedProcessId) {
+        $.get('scanwork/process_price/getModelPrices', {model_id: modelId}, function(data) {
+            if (data.code === 1) {
+                var processSelect = $('#process-select');
+                processSelect.empty().append('<option value="">请选择工序</option>');
+                
+                // 这里需要从后端获取工序列表
+                $.get('scanwork/process/index', function(processData) {
+                    if (processData.rows) {
+                        processData.rows.forEach(function(process) {
+                            var price = data.data[process.id] || 0;
+                            var selected = (process.id == selectedProcessId) ? 'selected' : '';
+                            processSelect.append('<option value="' + process.id + '" ' + selected + '>' + process.name + ' (工价: ' + price + '元/件)</option>');
+                        });
+                    }
+                    processSelect.selectpicker('refresh');
+                });
+            }
+        });
+    }
+});
+</script>

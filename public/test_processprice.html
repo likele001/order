@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProcessPrice模块测试页面（修复版）</title>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            console.log('jQuery加载成功');
+            
+            // 测试JS文件是否存在
+            $.get('/assets/js/backend/scanwork/processprice.js')
+                .done(function() {
+                    console.log('✓ JS文件存在');
+                    $('#js-test').html('<div class="success">✓ JS文件存在</div>');
+                })
+                .fail(function() {
+                    console.log('✗ JS文件不存在');
+                    $('#js-test').html('<div class="error">✗ JS文件不存在</div>');
+                });
+            
+            // 测试控制器URL访问
+            $.get('/lsj5492li.php/scanwork/processprice/index')
+                .done(function(data) {
+                    console.log('✓ 控制器访问成功');
+                    $('#url-test').html('<div class="success">✓ 控制器访问成功</div>');
+                })
+                .fail(function(xhr) {
+                    console.log('✗ 控制器访问失败: ' + xhr.status);
+                    $('#url-test').html('<div class="error">✗ 控制器访问失败: ' + xhr.status + ' - ' + xhr.statusText + '</div>');
+                });
+            
+            // 测试添加页面
+            $.get('/lsj5492li.php/scanwork/processprice/add')
+                .done(function(data) {
+                    console.log('✓ 添加页面访问成功');
+                    $('#add-test').html('<div class="success">✓ 添加页面访问成功</div>');
+                })
+                .fail(function(xhr) {
+                    console.log('✗ 添加页面访问失败: ' + xhr.status);
+                    $('#add-test').html('<div class="error">✗ 添加页面访问失败: ' + xhr.status + '</div>');
+                });
+            
+            // 测试权限检查
+            $.get('/lsj5492li.php/scanwork/processprice/index?addtabs=1')
+                .done(function(data) {
+                    console.log('✓ 带参数访问成功');
+                    $('#param-test').html('<div class="success">✓ 带参数访问成功</div>');
+                })
+                .fail(function(xhr) {
+                    console.log('✗ 带参数访问失败: ' + xhr.status);
+                    $('#param-test').html('<div class="error">✗ 带参数访问失败: ' + xhr.status + '</div>');
+                });
+        });
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; margin: 5px 0; }
+        .error { color: red; margin: 5px 0; }
+        .test-section { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+        .test-section h3 { margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>ProcessPrice模块测试页面（修复版）</h1>
+    <p>此页面用于测试工序工价管理模块是否能正常访问。</p>
+    
+    <div class="test-section">
+        <h3>JS文件测试：</h3>
+        <div id="js-test">测试中...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>控制器访问测试：</h3>
+        <div id="url-test">测试中...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>添加页面测试：</h3>
+        <div id="add-test">测试中...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>带参数访问测试：</h3>
+        <div id="param-test">测试中...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>说明：</h3>
+        <ul>
+            <li>绿色 ✓ 表示访问成功</li>
+            <li>红色 ✗ 表示访问失败</li>
+            <li>如果所有测试都显示绿色，说明模块工作正常</li>
+            <li>如果出现404错误，可能是路由或权限问题</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h3>测试的URL：</h3>
+        <ul>
+            <li>/assets/js/backend/scanwork/processprice.js - JS文件</li>
+            <li>/lsj5492li.php/scanwork/processprice/index - 列表页面</li>
+            <li>/lsj5492li.php/scanwork/processprice/add - 添加页面</li>
+            <li>/lsj5492li.php/scanwork/processprice/index?addtabs=1 - 带参数访问</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h3>直接链接测试：</h3>
+        <p><a href="/lsj5492li.php/scanwork/processprice?ref=addtabs" target="_blank">点击这里直接访问工序工价管理页面</a></p>
+    </div>
+</body>
+</html>

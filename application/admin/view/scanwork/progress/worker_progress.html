@@ -1,0 +1,43 @@
+<div class="panel panel-default">
+    <div class="panel-heading">员工进度统计</div>
+    <div class="panel-body">
+        <div id="echarts-worker-progress" style="width:100%;height:400px;"></div>
+        <table class="table table-bordered" id="table-worker-progress">
+            <thead><tr><th>员工</th><th>报工数</th><th>总工资</th></tr></thead>
+            <tbody>
+            {volist name="workerStats" id="row"}
+                <tr>
+                    <td>{$row.user_name}</td>
+                    <td>{$row.total_quantity}</td>
+                    <td>{$row.total_wage}</td>
+                </tr>
+            {/volist}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="https://cdn.staticfile.org/echarts/5.4.3/echarts.min.js"></script>
+{php}
+$workerChartArr = [];
+foreach($workerStats as $row){
+    $workerChartArr[] = [
+        'name' => $row['user_name'],
+        'quantity' => $row['total_quantity'],
+        'wage' => $row['total_wage']
+    ];
+}
+echo '<script>window.workerChartData = ' . json_encode($workerChartArr, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) . ';</script>';
+{/php}
+<script>
+var chart = echarts.init(document.getElementById('echarts-worker-progress'));
+chart.setOption({
+    title: {text: '员工报工统计'},
+    tooltip: {},
+    xAxis: {data: window.workerChartData.map(function(r){return r.name;})},
+    yAxis: {},
+    series: [
+        {name:'报工数',type:'bar',data:window.workerChartData.map(function(r){return r.quantity;})},
+        {name:'总工资',type:'bar',data:window.workerChartData.map(function(r){return r.wage;})}
+    ]
+});
+</script> 

@@ -1,0 +1,105 @@
+
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link href="/assets/libs/font-awesome/css/font-awesome.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="/assets/js/echarts.min.js"></script>
+  <!-- Tailwind 配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            success: '#52C41A',
+            warning: '#FAAD14',
+            danger: '#F5222D',
+            info: '#86909C',
+            light: '#F2F3F5',
+            dark: '#1D2129',
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto { content-visibility: auto; }
+      .card-shadow { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); }
+      .nav-shadow { box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05); }
+      .transition-custom { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    }
+  </style>
+</head>
+<body class="font-inter bg-gray-50 text-gray-800">
+  <!-- 导航栏 -->
+  <header class="fixed top-0 left-0 right-0 bg-white nav-shadow z-50 transition-custom">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo 和品牌名称 -->
+        <div class="flex items-center">
+          <a href="#" class="flex items-center">
+            <i class="fa fa-industry text-primary text-2xl mr-2"></i>
+            <span class="font-bold text-xl text-primary">工厂报工系统</span>
+          </a>
+        </div>
+        <!-- 桌面端导航 -->
+        <nav class="hidden md:flex space-x-8">
+          <a href="{:url('worker/index')}" class="text-gray-600 hover:text-primary transition-custom font-medium">首页</a>
+          <a href="{:url('worker/records')}" class="text-gray-600 hover:text-primary transition-custom font-medium">报工记录</a>
+          <a href="{:url('worker/wage')}" class="text-gray-600 hover:text-primary transition-custom font-medium">工资统计</a>
+          <a href="{:url('worker/tasks')}" class="text-gray-600 hover:text-primary transition-custom font-medium">我的任务</a>
+          <a href="{:url('user/index')}" class="text-gray-600 hover:text-primary transition-custom font-medium">个人中心</a>
+        </nav>
+        <!-- 用户信息和移动端菜单按钮 -->
+        <div class="flex items-center">
+          <!-- 通知图标 -->
+          <button class="relative p-2 text-gray-500 hover:text-primary transition-custom mr-3">
+            <i class="fa fa-bell-o text-xl"></i>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full"></span>
+          </button>
+          <!-- 用户头像 -->
+          <div class="relative">
+            <button class="flex items-center focus:outline-none" id="userMenuButton">
+              <img src="https://picsum.photos/id/1005/40/40" alt="用户头像" class="w-8 h-8 rounded-full object-cover border-2 border-primary">
+              <span class="ml-2 hidden md:block font-medium">{$user.nickname|default='工人'}</span>
+              <i class="fa fa-angle-down ml-1 text-gray-500"></i>
+            </button>
+            <!-- 用户下拉菜单 -->
+            <div class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50" id="userMenu">
+              <a href="{:url('user/profile')}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fa fa-user-o mr-2"></i>个人资料
+              </a>
+              <a href="{:url('user/setting')}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fa fa-cog mr-2"></i>账户设置
+              </a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="{:url('user/logout')}" class="block px-4 py-2 text-sm text-danger hover:bg-gray-100">
+                <i class="fa fa-sign-out mr-2"></i>退出登录
+              </a>
+            </div>
+          </div>
+          <!-- 移动端菜单按钮 -->
+          <button class="ml-4 md:hidden p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100 focus:outline-none" id="mobileMenuButton">
+            <i class="fa fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+      <!-- 移动端导航菜单 -->
+      <div class="md:hidden hidden" id="mobileMenu">
+        <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          <a href="{:url('worker/index')}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50">首页</a>
+          <a href="{:url('worker/records')}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50">报工记录</a>
+          <a href="{:url('worker/wage')}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50">工资统计</a>
+          <a href="{:url('worker/tasks')}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50">我的任务</a>
+          <a href="{:url('user/index')}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:text-primary hover:bg-gray-50">个人中心</a>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main class="container mx-auto px-4 pt-24 pb-12">

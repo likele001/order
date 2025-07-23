@@ -1,0 +1,137 @@
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Tailwind 配置 -->
+
+
+
+<style>
+    .basicinfo {
+        margin: 15px 0;
+    }
+
+    .basicinfo .row > .col-xs-4 {
+        padding-right: 0;
+    }
+
+    .basicinfo .row > div {
+        margin: 5px 0;
+    }
+</style>
+<div id="content-container" class="container">
+    <div class="row">
+        <div class="col-md-3">
+            {include file="common/sidenav" /}
+        </div>
+        <div class="col-md-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h2 class="page-header">
+                        {:__('Member center')}
+                        <a href="{:url('user/profile')}" class="btn btn-primary pull-right"><i class="fa fa-pencil"></i> {:__('Profile')}</a>
+                    </h2>
+                    <div class="row user-baseinfo">
+                        <div class="col-md-3 col-sm-3 col-xs-3 text-center user-center">
+                            <a href="{:url('user/profile')}" title="{:__('Click to edit')}">
+                                <span class="avatar-img"><img src="{$user.avatar|htmlentities|cdnurl}" alt=""></span>
+                            </a>
+                        </div>
+                        <div class="col-md-9 col-sm-9 col-xs-9">
+                            <div class="ui-content">
+                                <h4><a href="{:url('user/profile')}">{$user.nickname|htmlentities}</a></h4>
+                                <p class="text-muted">
+                                    {$user.bio|default=__("This guy hasn't written anything yet")|htmlentities}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-9 col-sm-9 col-xs-12">
+                            <div class="ui-content">
+                                <div class="basicinfo">
+                                    <div class="row">
+                                        <div class="col-xs-4 col-md-2">{:__('Money')}</div>
+                                        <div class="col-xs-8 col-md-4">
+                                            <a href="javascript:;" class="viewmoney">{$user.money}</a>
+                                        </div>
+                                        <div class="col-xs-4 col-md-2">{:__('Score')}</div>
+                                        <div class="col-xs-8 col-md-4">
+                                            <a href="javascript:;" class="viewscore">{$user.score}</a>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-4 col-md-2">{:__('Logintime')}</div>
+                                        <div class="col-xs-8 col-md-4">{$user.logintime|date="Y-m-d H:i:s",###}</div>
+                                        <div class="col-xs-4 col-md-2">{:__('Prevtime')}</div>
+                                        <div class="col-xs-8 col-md-4">{$user.prevtime|date="Y-m-d H:i:s",###}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 统计卡片 -->
+<div class="max-w-7xl mx-auto mt-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gradient-to-r from-green-400 to-green-600 rounded-lg p-6 text-white text-center shadow">
+            <div class="text-3xl font-bold mb-2 flex items-center justify-center"><i class="fa fa-list-alt mr-2"></i>{$todayReportCount|default=0}</div>
+            <div class="text-green-100">今日报工数量</div>
+        </div>
+        <div class="bg-gradient-to-r from-purple-400 to-purple-600 rounded-lg p-6 text-white text-center shadow">
+            <div class="text-3xl font-bold mb-2 flex items-center justify-center"><i class="fa fa-cny mr-2"></i>¥{$todayWage|default='0.00'}</div>
+            <div class="text-purple-100">今日工资总额</div>
+        </div>
+        <div class="bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg p-6 text-white text-center shadow">
+            <div class="text-3xl font-bold mb-2 flex items-center justify-center"><i class="fa fa-clock-o mr-2"></i>{$pendingReportCount|default=0}</div>
+            <div class="text-yellow-100">待确认报工</div>
+        </div>
+    </div>
+</div>
+
+<!-- 用户自己的报工任务列表 -->
+<div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-6 mt-8">
+        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center"><i class="fa fa-tasks text-primary mr-2"></i>我的报工任务</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2">订单号</th>
+                        <th class="px-4 py-2">产品名称</th>
+                        <th class="px-4 py-2">型号</th>
+                        <th class="px-4 py-2">工序</th>
+                        <th class="px-4 py-2">分配数量</th>
+                        <th class="px-4 py-2">已报数量</th>
+                        <th class="px-4 py-2">待报数量</th>
+                        <th class="px-4 py-2">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {volist name="tasks" id="task"}
+                    <tr class="hover:bg-blue-50 transition">
+                        <td class="px-4 py-2">{$task.order_no|default='-'}</td>
+                        <td class="px-4 py-2">{$task.product_name|default='-'}</td>
+                        <td class="px-4 py-2">{$task.model_name|default='-'}</td>
+                        <td class="px-4 py-2">{$task.process_name|default='-'}</td>
+                        <td class="px-4 py-2">{$task.quantity}</td>
+                        <td class="px-4 py-2">{$task.reported_quantity|default=0}</td>
+                        <td class="px-4 py-2">{$task.quantity - $task.reported_quantity}</td>
+                        <td class="px-4 py-2">
+                            <a href="{:url('worker/report', ['id'=>$task.id])}" class="inline-flex items-center px-4 py-1 bg-primary text-white rounded hover:bg-blue-700 transition text-sm">
+                                <i class="fa fa-pencil mr-1"></i>去报工
+                            </a>
+                        </td>
+                    </tr>
+                    {/volist}
+                </tbody>
+            </table>
+            {if condition="empty($tasks)"}
+            <div class="text-center py-8 text-gray-400">暂无报工任务</div>
+            {/if}
+        </div>
+    </div>
+</div>

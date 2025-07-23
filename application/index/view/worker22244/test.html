@@ -1,0 +1,29 @@
+{include file="common/header" /}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">测试页面</h3>
+                </div>
+                <div class="panel-body">
+                    <p>Worker控制器测试页面</p>
+                    <p>当前用户ID：{$user.id|default='未登录'}</p>
+                    <button class="btn btn-primary" onclick="testAjax()">测试AJAX</button>
+                    <div id="result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function testAjax() {
+    $.get('test', function(data) {
+        $('#result').html('<pre>' + JSON.stringify(data, null, 2) + '</pre>');
+    });
+}
+</script>
+
+{include file="common/footer" /} 

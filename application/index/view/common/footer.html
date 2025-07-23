@@ -1,0 +1,97 @@
+  </main>
+  <!-- 页脚 -->
+  <footer class="bg-gray-800 text-white py-8">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-lg font-bold mb-4">工厂报工系统</h3>
+          <p class="text-gray-400 text-sm">高效管理员工报工数据，精准计算工资，提升工厂管理效率。</p>
+          <div class="mt-4 flex space-x-4">
+            <a href="#" class="text-gray-400 hover:text-white transition-custom">
+              <i class="fa fa-weixin text-xl"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-custom">
+              <i class="fa fa-qq text-xl"></i>
+            </a>
+            <a href="#" class="text-gray-400 hover:text-white transition-custom">
+              <i class="fa fa-phone text-xl"></i>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold mb-4">快速链接</h3>
+          <ul class="space-y-2 text-sm">
+            <li><a href="{:url('worker/index')}" class="text-gray-400 hover:text-white transition-custom">首页</a></li>
+            <li><a href="{:url('worker/records')}" class="text-gray-400 hover:text-white transition-custom">报工记录</a></li>
+            <li><a href="{:url('worker/wage')}" class="text-gray-400 hover:text-white transition-custom">工资统计</a></li>
+            <li><a href="{:url('user/index')}" class="text-gray-400 hover:text-white transition-custom">个人中心</a></li>
+            <li><a href="#" class="text-gray-400 hover:text-white transition-custom">帮助中心</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold mb-4">联系我们</h3>
+          <ul class="space-y-2 text-sm">
+            <li class="flex items-start">
+              <i class="fa fa-map-marker mt-1 mr-3 text-gray-400"></i>
+              <span class="text-gray-400">重庆市渝北区回兴街道</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-phone mt-1 mr-3 text-gray-400"></i>
+              <span class="text-gray-400">400-123-4567</span>
+            </li>
+            <li class="flex items-start">
+              <i class="fa fa-envelope-o mt-1 mr-3 text-gray-400"></i>
+              <span class="text-gray-400">kele@023ent.net</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
+        <p>© 2023 工厂报工系统 版权所有</p>
+      </div>
+    </div>
+  </footer>
+  <!-- JavaScript -->
+  <script>
+    // 导航菜单交互
+    document.addEventListener('DOMContentLoaded', function() {
+      // 移动端菜单切换
+      const mobileMenuButton = document.getElementById('mobileMenuButton');
+      const mobileMenu = document.getElementById('mobileMenu');
+      if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener('click', function() {
+          mobileMenu.classList.toggle('hidden');
+        });
+      }
+      // 用户下拉菜单
+      const userMenuButton = document.getElementById('userMenuButton');
+      const userMenu = document.getElementById('userMenu');
+      if (userMenuButton && userMenu) {
+        userMenuButton.addEventListener('click', function() {
+          userMenu.classList.toggle('hidden');
+        });
+        // 点击其他区域关闭下拉菜单
+        document.addEventListener('click', function(event) {
+          if (!userMenuButton.contains(event.target) && !userMenu.contains(event.target)) {
+            userMenu.classList.add('hidden');
+          }
+        });
+      }
+      // 导航栏滚动效果
+      const header = document.querySelector('header');
+      let lastScrollTop = 0;
+      window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        if (scrollTop > 10) {
+          header.classList.add('bg-white/95', 'backdrop-blur-sm');
+          header.classList.remove('bg-white');
+        } else {
+          header.classList.remove('bg-white/95', 'backdrop-blur-sm');
+          header.classList.add('bg-white');
+        }
+        lastScrollTop = scrollTop;
+      });
+    });
+  </script>
+</body>
+</html> 

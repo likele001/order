@@ -1,0 +1,173 @@
+<div class="panel panel-default panel-intro">
+    <div class="panel-heading">
+        <h3 class="panel-title">工资统计</h3>
+    </div>
+
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-12">
+                <form class="form-inline" id="search-form">
+                    <div class="form-group">
+                        <label>开始日期：</label>
+                        <input type="date" class="form-control" name="start_date" value="{:date('Y-m-01')}">
+                    </div>
+                    <div class="form-group">
+                        <label>结束日期：</label>
+                        <input type="date" class="form-control" name="end_date" value="{:date('Y-m-d')}">
+                    </div>
+                    <div class="form-group">
+                        <label>员工：</label>
+                        <select class="form-control" name="user_id">
+                            <option value="">全部员工</option>
+                            {foreach $userList as $id => $name}
+                            <option value="{$id}">{$name}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="search-btn">查询</button>
+                    <button type="button" class="btn btn-success" id="export-btn">导出</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="row" style="margin-top: 20px;">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="wage-table">
+                        <thead>
+                            <tr>
+                                <th>员工姓名</th>
+                                <th>报工次数</th>
+                                <th>总数量</th>
+                                <th>总工资</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 动态加载数据 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 工资明细模态框 -->
+<div class="modal fade" id="detail-modal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="detailModalLabel">工资明细</h4>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="detail-table">
+                        <thead>
+                            <tr>
+                                <th>报工时间</th>
+                                <th>订单号</th>
+                                <th>产品型号</th>
+                                <th>工序</th>
+                                <th>数量</th>
+                                <th>工价</th>
+                                <th>工资</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 动态加载数据 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 查询工资统计
+    function loadWageStats() {
+        var formData = $('#search-form').serialize();
+        
+        $.get('scanwork/report/wage?' + formData, function(data) {
+            if (data.code === 1) {
+                var tbody = $('#wage-table tbody');
+                tbody.empty();
+                
+                data.data.forEach(function(item) {
+                    var row = '<tr>';
+                    row += '<td>' + item.user.nickname + '</td>';
+                    row += '<td>' + item.details.length + '</td>';
+                    row += '<td>' + item.total_quantity + '</td>';
+                    row += '<td>' + parseFloat(item.total_wage).toFixed(2) + '</td>';
+                    row += '<td><button class="btn btn-xs btn-info view-detail" data-user-id="' + item.user.id + '">查看明细</button></td>';
+                    row += '</tr>';
+                    tbody.append(row);
+                });
+            }
+        });
+    }
+
+    // 查看明细
+    $(document).on('click', '.view-detail', function() {
+        var userId = $(this).data('user-id');
+        var formData = $('#search-form').serialize();
+        
+        $.get('scanwork/report/wage?' + formData + '&user_id=' + userId, function(data) {
+            if (data.code === 1 && data.data[userId]) {
+                var details = data.data[userId].details;
+                var tbody = $('#detail-table tbody');
+                tbody.empty();
+                
+                details.forEach(function(item) {
+                    var row = '<tr>';
+                    row += '<td>' + formatDateTime(item.createtime) + '</td>';
+                    row += '<td>' + item.allocation.order.order_no + '</td>';
+                    var modelDisplayName = item.allocation.model.product.name + ' - ' + item.allocation.model.name;
+                    if (item.allocation.model.model_code) {
+                        modelDisplayName += ' (' + item.allocation.model.model_code + ')';
+                    }
+                    row += '<td>' + modelDisplayName + '</td>';
+                    row += '<td>' + item.allocation.process.name + '</td>';
+                    row += '<td>' + item.quantity + '</td>';
+                    row += '<td>' + parseFloat(item.allocation.price).toFixed(2) + '</td>';
+                    row += '<td>' + parseFloat(item.wage).toFixed(2) + '</td>';
+                    row += '</tr>';
+                    tbody.append(row);
+                });
+                
+                $('#detail-modal').modal('show');
+            }
+        });
+    });
+
+    // 查询按钮
+    $('#search-btn').click(function() {
+        loadWageStats();
+    });
+
+    // 导出按钮
+    $('#export-btn').click(function() {
+        var formData = $('#search-form').serialize();
+        window.open('scanwork/report/wage?' + formData + '&export=1');
+    });
+
+    // 格式化日期时间
+    function formatDateTime(timestamp) {
+        var date = new Date(timestamp * 1000);
+        return date.getFullYear() + '-' + 
+               String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+               String(date.getDate()).padStart(2, '0') + ' ' +
+               String(date.getHours()).padStart(2, '0') + ':' + 
+               String(date.getMinutes()).padStart(2, '0');
+    }
+
+    // 页面加载时初始化
+    $(function() {
+        loadWageStats();
+    });
+</script> 

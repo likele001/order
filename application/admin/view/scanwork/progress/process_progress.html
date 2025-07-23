@@ -1,0 +1,45 @@
+<div class="panel panel-default">
+    <div class="panel-heading">工序进度统计</div>
+    <div class="panel-body">
+        <div id="echarts-process-progress" style="width:100%;height:400px;"></div>
+        <table class="table table-bordered" id="table-process-progress">
+            <thead><tr><th>产品名称</th><th>型号</th><th>工序</th><th>报工数</th><th>总工资</th></tr></thead>
+            <tbody>
+            {volist name="processStats" id="row"}
+                <tr>
+                    <td>{$row.product_name|default='-'}</td>
+                    <td>{$row.model_name|default='-'}</td>
+                    <td>{$row.process_name|default='-'}</td>
+                    <td>{$row.total_quantity}</td>
+                    <td>{$row.total_wage}</td>
+                </tr>
+            {/volist}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="https://cdn.staticfile.org/echarts/5.4.3/echarts.min.js"></script>
+{php}
+$processChartArr = [];
+foreach($processStats as $row){
+    $processChartArr[] = [
+        'name' => $row['product_name'].'-'.$row['model_name'].'-'.$row['process_name'],
+        'quantity' => $row['total_quantity'],
+        'wage' => $row['total_wage']
+    ];
+}
+echo '<script>window.processChartData = ' . json_encode($processChartArr, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) . ';</script>';
+{/php}
+<script>
+var chart = echarts.init(document.getElementById('echarts-process-progress'));
+chart.setOption({
+    title: {text: '工序报工统计'},
+    tooltip: {},
+    xAxis: {data: window.processChartData.map(function(r){return r.name;})},
+    yAxis: {},
+    series: [
+        {name:'报工数',type:'bar',data:window.processChartData.map(function(r){return r.quantity;})},
+        {name:'总工资',type:'bar',data:window.processChartData.map(function(r){return r.wage;})}
+    ]
+});
+</script> 
