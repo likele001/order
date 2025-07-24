@@ -63,6 +63,7 @@
                                 <tr>
                                     <th>工序名称</th>
                                     <th>工价（元/件）</th>
+                                    <th>工时单价（元/小时）</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -71,6 +72,9 @@
                                     <td>{$process.name}</td>
                                     <td>
                                         <input type="number" name="prices[{$process.id}]" class="form-control process-price" data-process-id="{$process.id}" step="0.01" min="0" placeholder="请输入工价">
+                                    </td>
+                                    <td>
+                                        <input type="number" name="time_prices[{$process.id}]" class="form-control process-time-price" data-process-id="{$process.id}" step="0.01" min="0" placeholder="请输入工时单价">
                                     </td>
                                 </tr>
                                 {/foreach}

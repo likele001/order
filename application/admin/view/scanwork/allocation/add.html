@@ -48,23 +48,43 @@
             <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
         </div>
     </div>
+</form>
+
 <script>
     $(document).ready(function() {
         function toggleQuantityField() {
-            if ($('#work-type-select').val() === 'time') {
-                $('#quantity-group').hide();
-                $('#c-quantity').removeAttr('data-rule');
+            var workType = $('#work-type-select').val();
+            if (workType === 'time') {
+                // 计时模式：完全移除数量字段
+                $('#quantity-group').remove();
             } else {
+                // 计件模式：显示数量字段，添加验证规则
                 $('#quantity-group').show();
-                $('#c-quantity').attr('data-rule', 'required;number');
+                $('#c-quantity').attr('data-rule', 'required;number').val('');
             }
+            
+            // 重新初始化表单验证
+            if (typeof $("#add-form").data('validator') !== 'undefined') {
+                $("#add-form").data('validator').destroy();
+            }
+            $("#add-form").validator();
         }
 
+        // 页面加载时初始化
         toggleQuantityField();
 
+        // 工作类型改变时切换
         $('#work-type-select').on('change', function() {
             toggleQuantityField();
         });
+        
+        // 表单提交前处理
+        $('#add-form').on('submit', function(e) {
+            var workType = $('#work-type-select').val();
+            if (workType === 'time') {
+                // 计时模式下确保数量为1（后端会设置为0）
+                $('#c-quantity').val('1');
+            }
+        });
     });
 </script>
-</form>

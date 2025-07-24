@@ -257,6 +257,7 @@ class ProcessPrice extends Backend
         if ($this->request->isPost()) {
             $modelId = $this->request->post('model_id');
             $prices = $this->request->post('prices/a');
+            $timePrices = $this->request->post('time_prices/a');
             
             if (!$modelId) {
                 $this->error('请选择型号');
@@ -275,16 +276,17 @@ class ProcessPrice extends Backend
                             'model_id' => $modelId,
                             'process_id' => $processId
                         ])->find();
-                        
+                        $time_price = isset($timePrices[$processId]) ? $timePrices[$processId] : 0;
                         if ($exists) {
                             // 更新现有记录
-                            $exists->save(['price' => $price]);
+                            $exists->save(['price' => $price, 'time_price' => $time_price]);
                         } else {
                             // 创建新记录
                             $this->model->create([
                                 'model_id' => $modelId,
                                 'process_id' => $processId,
                                 'price' => $price,
+                                'time_price' => $time_price,
                                 'status' => 1
                             ]);
                         }

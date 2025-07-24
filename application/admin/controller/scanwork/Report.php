@@ -52,6 +52,55 @@ class Report extends Backend
     }
 
     /**
+     * 新增报工
+     */
+    public function add()
+    {
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            $allocation = \app\admin\model\scanwork\Allocation::get($params['allocation_id']);
+            if (!$allocation) {
+                $this->error('分配不存在');
+            }
+            
+            $processPrice = \app\admin\model\scanwork\ProcessPrice::where([
+                'model_id' => $allocation->model_id,
+                'process_id' => $allocation->process_id
+            ])->find();
+            if (!$processPrice) {
+                $this->error('工序工资未设置');
+            }
+            if ($workType == 'piece') {
+                $quantity = $params['quantity'];
+                $wage = $quantity * $processPrice->piece_price;
+                $data = [
+                    'allocation_id' => $allocation->id,
+                    'user_id' => $allocation->user_id,
+                    'quantity' => $quantity,
+                    'wage' => $wage,
+                    'remark' => isset($params['remark']) ? $params['remark'] : '',
+                    'createtime' => time()
+                ];
+            } else {
+                $work_hours = $params['work_hours'];
+                $wage = $work_hours * $processPrice->time_price;
+                $data = [
+                    'allocation_id' => $allocation->id,
+                    'user_id' => $allocation->user_id,
+                 
+                    'work_hours' => $work_hours,
+                    'wage' => $wage,
+                    'remark' => isset($params['remark']) ? $params['remark'] : '',
+                    'createtime' => time()
+                ];
+            }
+            \app\admin\model\scanwork\Report::create($data);
+            $this->success('报工成功');
+        }
+        return $this->view->fetch();
+    }
+
+    /**
      * 日报工页面
      */
     public function dailyReport()

@@ -18,6 +18,12 @@
         </div>
     </div>
     <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">工时单价(元/小时):</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-time_price" data-rule="required;number" class="form-control" name="row[time_price]" type="number" step="0.01" min="0" value="{$row.time_price|default='0.00'}">
+        </div>
+    </div>
+    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('状态')}:</label>
         <div class="col-xs-12 col-sm-8">
             {:build_radios('row[status]', ['1'=>__('正常'), '0'=>__('禁用')], $row.status)}

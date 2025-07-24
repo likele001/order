@@ -37,6 +37,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'price', title: __('工价(元/件)'), align: 'right', formatter: function(value, row, index) {
                             return parseFloat(value).toFixed(2);
                         }},
+                        {field: 'time_price', title: __('工时单价(元/小时)'), align: 'right', formatter: function(value, row, index) {
+                            return parseFloat(value).toFixed(2);
+                        }},
                         {field: 'status', title: __('状态'), searchList: {"1":__('正常'),"0":__('禁用')}, formatter: Table.api.formatter.status},
                         {field: 'createtime', title: __('创建时间'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},
                         {field: 'updatetime', title: __('更新时间'), formatter: Table.api.formatter.datetime, operate: 'RANGE', addclass: 'datetimerange', sortable: true},

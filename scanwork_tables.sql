@@ -128,6 +128,7 @@ CREATE TABLE `fa_scanwork_qrcode` (
   UNIQUE KEY `allocation_id` (`allocation_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='二维码表';
 
+
 -- 插入示例数据
 INSERT INTO `fa_scanwork_product` (`name`, `specification`, `status`, `createtime`) VALUES
 ('智能手机', '5.5寸屏幕，4GB内存，64GB存储', 1, UNIX_TIMESTAMP()),
@@ -182,4 +183,55 @@ INSERT INTO `fa_scanwork_report` (`allocation_id`, `user_id`, `quantity`, `wage`
 (4, 2, 20, 80.00, 1, UNIX_TIMESTAMP()),
 (5, 1, 35, 280.00, 1, UNIX_TIMESTAMP()),
 (6, 2, 30, 180.00, 1, UNIX_TIMESTAMP()); 
+
+
+CREATE TABLE `fa_scanwork_tallocationtime` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `order_id` int(11) NOT NULL COMMENT '订单ID',
+  `model_id` int(11) NOT NULL COMMENT '型号ID',
+  `process_id` int(11) NOT NULL COMMENT '工序ID',
+  `user_id` int(11) NOT NULL COMMENT '员工ID',
+  `work_date` date NOT NULL COMMENT '工作日期',
+  `start_time` time DEFAULT NULL COMMENT '开始时间',
+  `end_time` time DEFAULT NULL COMMENT '结束时间',
+  `total_hours` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '工时',
+  `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '状态:0=进行中,1=已完成',
+  `createtime` int(10) DEFAULT NULL COMMENT '创建时间',
+  `updatetime` int(10) DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `order_id` (`order_id`),
+  KEY `model_id` (`model_id`),
+  KEY `process_id` (`process_id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='计时分工表';
+
+CREATE TABLE `fa_scanwork_treporttime` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `tallocationtime_id` int(11) NOT NULL COMMENT '计时分工ID',
+  `user_id` int(11) NOT NULL COMMENT '员工ID',
+  `work_date` date NOT NULL COMMENT '工作日期',
+  `start_time` time DEFAULT NULL COMMENT '开始时间',
+  `end_time` time DEFAULT NULL COMMENT '结束时间',
+  `total_hours` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '工时',
+  `wage` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '工资(元)',
+  `status` tinyint(1) NOT NULL DEFAULT '0' COMMENT '状态:0=待确认,1=已确认',
+  `remark` text COMMENT '备注',
+  `createtime` int(10) DEFAULT NULL COMMENT '创建时间',
+  `updatetime` int(10) DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `tallocationtime_id` (`tallocationtime_id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='计时报工表';
+
+CREATE TABLE `fa_scanwork_twage` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int(11) NOT NULL COMMENT '员工ID',
+  `work_date` date NOT NULL COMMENT '工作日期',
+  `total_hours` decimal(6,2) NOT NULL DEFAULT '0.00' COMMENT '工时',
+  `wage` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT '工资(元)',
+  `createtime` int(10) DEFAULT NULL COMMENT '创建时间',
+  `updatetime` int(10) DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='计时工资统计表'; 
 

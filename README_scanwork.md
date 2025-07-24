@@ -184,6 +184,20 @@ application/admin/view/scanwork/           # 视图
 - [x] 第四阶段：二维码扫码功能
 - [x] 第五阶段：移动端适配
 
+、前端菜单建议
+1. 工人端页面菜单（举例）
+你可以在工人端导航栏或首页添加如下入口：
+我的计时分工任务：/index/worker/ttasks
+计时报工：/index/worker/treport
+我的计时报工记录：/index/worker/trecords
+我的计时工资统计：/index/worker/twage
+<ul class="nav nav-pills">
+  <li><a href="/index/worker/ttasks">计时分工任务</a></li>
+  <li><a href="/index/worker/treport">计时报工</a></li>
+  <li><a href="/index/worker/trecords">计时报工记录</a></li>
+  <li><a href="/index/worker/twage">计时工资统计</a></li>
+</ul>
+
 ## 联系方式
 
 如有问题或建议，请联系开发团队。 

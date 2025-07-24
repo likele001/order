@@ -19,7 +19,8 @@ class Report extends Model
 
     // 追加属性
     protected $append = [
-        'status_text'
+        'status_text',
+        'work_type_text',
     ];
     
     public function getStatusList()
@@ -31,6 +32,18 @@ class Report extends Model
     {
         $value = $value ? $value : (isset($data['status']) ? $data['status'] : '');
         $list = $this->getStatusList();
+        return isset($list[$value]) ? $list[$value] : '';
+    }
+
+    public function getWorkTypeList()
+    {
+        return ['piece' => '计件', 'time' => '计时'];
+    }
+
+    public function getWorkTypeTextAttr($value, $data)
+    {
+        $value = $value ? $value : (isset($data['work_type']) ? $data['work_type'] : '');
+        $list = $this->getWorkTypeList();
         return isset($list[$value]) ? $list[$value] : '';
     }
 

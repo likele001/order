@@ -88,6 +88,12 @@ class Allocation extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                // 新增work_type处理
+                $workType = isset($params['work_type']) ? $params['work_type'] : 'piece';
+                $params['work_type'] = $workType;
+                if ($workType == 'time') {
+                    $params['quantity'] = 0;
+                }
         
                 if ($this->dataLimit && $this->dataLimitFieldAutoFill) {
                     $params[$this->dataLimitField] = $this->auth->id;
@@ -236,6 +242,12 @@ class Allocation extends Backend
             $params = $this->request->post("row/a");
             if ($params) {
                 $params = $this->preExcludeFields($params);
+                // 新增work_type处理
+                $workType = isset($params['work_type']) ? $params['work_type'] : 'piece';
+                $params['work_type'] = $workType;
+                if ($workType == 'time') {
+                    $params['quantity'] = 0;
+                }
                 $result = false;
                 Db::startTrans();
                 try {

@@ -1,0 +1,97 @@
+<form id="batch-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    <input type="hidden" name="order_id" value="{$order.id}">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">订单信息:</label>
+        <div class="col-xs-12 col-sm-8">
+            <p><strong>订单号:</strong>{$order.order_no}</p>
+            <p><strong>客户:</strong>{$order.customer_name}</p>
+            <p><strong>总数量:</strong>{$order.total_quantity}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">型号分配:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="allocation-table">
+                    <thead>
+                        <tr>
+                            <th>型号</th>
+                            <th>订单数量</th>
+                            <th>工序</th>
+                            <th>员工</th>
+                            <th>工时</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {foreach $order.orderModels as $orderModel}
+                        <tr class="allocation-row" data-model-id="{$orderModel.model_id}">
+                            <td>
+                                {$orderModel.model.product.name} - {$orderModel.model.name}
+                                {if $orderModel.model.model_code}
+                                    ({$orderModel.model.model_code})
+                                {/if}
+                            </td>
+                            <td>
+                                <span class="order-quantity">{$orderModel.quantity}</span>
+                            </td>
+                            <td>
+                                <select name="allocations[{$orderModel.model_id}][process_id]" class="form-control process-select" required>
+                                    <option value="">请选择工序</option>
+                                    {foreach $processList as $id => $name}
+                                    <option value="{$id}">{$name}</option>
+                                    {/foreach}
+                                </select>
+                            </td>
+                            <td>
+                                <select name="allocations[{$orderModel.model_id}][user_id]" class="form-control user-select" required>
+                                    <option value="">请选择员工</option>
+                                    {foreach $userList as $id => $name}
+                                    <option value="{$id}">{$name}</option>
+                                    {/foreach}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" name="allocations[{$orderModel.model_id}][total_hours]" class="form-control total-hours-input" min="0.01" step="0.01" value="" required>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-success btn-sm add-allocation-btn">添加分配</button>
+                            </td>
+                        </tr>
+                        {/foreach}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">保存分配</button>
+            <button type="reset" class="btn btn-default btn-embossed">重置</button>
+        </div>
+    </div>
+</form>
+<script>
+$(function() {
+    // 添加分配行
+    $(document).on('click', '.add-allocation-btn', function() {
+        var currentRow = $(this).closest('.allocation-row');
+        var modelId = currentRow.data('model-id');
+        var newRow = currentRow.clone();
+        newRow.find('select').val('');
+        newRow.find('.total-hours-input').val('');
+        currentRow.after(newRow);
+    });
+    // 删除分配行
+    $(document).on('click', '.remove-allocation-btn', function() {
+        var row = $(this).closest('.allocation-row');
+        var modelId = row.data('model-id');
+        if ($('.allocation-row[data-model-id="' + modelId + '"]').length > 1) {
+            row.remove();
+        } else {
+            Toastr.error('至少需要保留一个分配');
+        }
+    });
+});
+</script> 

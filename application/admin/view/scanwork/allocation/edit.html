@@ -30,7 +30,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('工作类型')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <select name="row[work_type]" class="form-control selectpicker" id="work-type-select">
+            <select name="row[type]" class="form-control selectpicker" id="work-type-select">
                 <option value="piece" {if $row.work_type == 'piece'}selected{/if}>计件</option>
                 <option value="time" {if $row.work_type == 'time'}selected{/if}>计时</option>
             </select>

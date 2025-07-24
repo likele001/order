@@ -5,10 +5,10 @@ use think\Log;
 
 use think\Model;
 
-class Allocation extends Model
+class Tallocationtime extends Model
 {
     // 表名
-    protected $name = 'scanwork_allocation';
+    protected $name = 'scanwork_tallocationtime';
     
     // 自动写入时间戳字段
     protected $autoWriteTimestamp = 'int';
@@ -75,13 +75,13 @@ class Allocation extends Model
     // 关联报工记录
     public function reports()
     {
-        return $this->hasMany('Report', 'allocation_id', 'id');
+        return $this->hasMany('Treporttime', 'tallocationtime_id', 'id');
     }
 
     // 关联二维码
     public function qrcodes()
     {
-        return $this->hasMany('Qrcode', 'allocation_id', 'id');
+        return $this->hasMany('Qrcode', 'tallocationtime_id', 'id');
     }
     
     // 获取工价
@@ -98,24 +98,24 @@ class Allocation extends Model
         return 0;
     }
     
-    // 获取已报数量
-    public function getReportedQuantityAttr($value, $data)
+    // 获取已报工时
+    public function getReportedTotalHoursAttr($value, $data)
     {
-        $allocationId = isset($data['id']) ? $data['id'] : $this->id;
-        if ($allocationId) {
-            $sum = \app\admin\model\scanwork\Report::where('allocation_id', $allocationId)
+        $tallocationtimeId = isset($data['id']) ? $data['id'] : $this->id;
+        if ($tallocationtimeId) {
+            $sum = \app\admin\model\scanwork\Treporttime::where('tallocationtime_id', $tallocationtimeId)
                 ->where('status', 1)
-                ->sum('quantity');
-            return $sum ? intval($sum) : 0;
+                ->sum('total_hours');
+            return $sum ? floatval($sum) : 0;
         }
         return 0;
     }
     
-    // 获取待报数量
-    public function getRemainingQuantityAttr($value, $data)
+    // 获取待报工时
+    public function getRemainingTotalHoursAttr($value, $data)
     {
-        $reported = $this->getReportedQuantityAttr($value, $data);
-        $total = isset($data['quantity']) ? intval($data['quantity']) : 0;
+        $reported = $this->getReportedTotalHoursAttr($value, $data);
+        $total = isset($data['total_hours']) ? floatval($data['total_hours']) : 0;
         $remaining = max(0, $total - $reported);
         return $remaining;
     }

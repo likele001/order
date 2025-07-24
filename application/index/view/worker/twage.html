@@ -1,0 +1,35 @@
+{include file="common/head" /}
+<div class="max-w-7xl mx-auto">
+  <div class="bg-white rounded-lg shadow-lg p-6">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6">
+      <i class="fa fa-money text-primary mr-2"></i> 我的计时工资统计
+    </h3>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日期</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">工时</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">工资(元)</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {volist name="wages" id="item"}
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{$item.work_date}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{$item.total_hours}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{$item.wage}</td>
+          </tr>
+          {/volist}
+        </tbody>
+      </table>
+    </div>
+    {if condition="empty($wages)"}
+    <div class="text-center py-12">
+      <i class="fa fa-inbox fa-3x text-gray-300 mb-4"></i>
+      <p class="text-gray-500">暂无工资记录</p>
+    </div>
+    {/if}
+  </div>
+</div>
+{include file="common/footer" /} 
