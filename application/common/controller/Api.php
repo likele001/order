@@ -144,6 +144,7 @@ class Api
 
         // 加载当前控制器语言包
         $this->loadlang($controllername);
+        file_put_contents('/tmp/api_init.log', 'header:'.json_encode($this->request->header()).PHP_EOL, FILE_APPEND);
     }
 
     /**

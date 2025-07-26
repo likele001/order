@@ -139,6 +139,16 @@ CREATE TABLE `fa_scanwork_report` (
   CONSTRAINT `fk_report_allocation` FOREIGN KEY (`allocation_id`) REFERENCES `fa_scanwork_allocation` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='报工记录表';
 
+
+CREATE TABLE IF NOT EXISTS `fa_scanwork_report_image` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `report_id` int(11) NOT NULL COMMENT '报工ID',
+  `image_url` varchar(255) NOT NULL COMMENT '图片路径',
+  `createtime` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `report_id` (`report_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='计件报工图片表';
+
 -- 插入示例数据
 INSERT INTO `fa_scanwork_product` (`name`, `specification`, `description`, `status`, `createtime`) VALUES
 ('智能手机', '6.1英寸', '高端智能手机产品', 1, UNIX_TIMESTAMP()),

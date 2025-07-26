@@ -562,6 +562,7 @@ CREATE TABLE `fa_user_score_log` (
 CREATE TABLE `fa_user_token` (
   `token` varchar(50) NOT NULL COMMENT 'Token',
   `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '会员ID',
+  `openid` varchar(64) DEFAULT '' COMMENT '微信openid',
   `createtime` bigint(16) DEFAULT NULL COMMENT '创建时间',
   `expiretime` bigint(16) DEFAULT NULL COMMENT '过期时间',
   PRIMARY KEY (`token`)

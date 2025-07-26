@@ -1,0 +1,9 @@
+<view class="container">
+  <view class="form-group">
+    <input class="weui-input" placeholder="账号/手机号" bindinput="onUsernameInput" value="{{username}}" />
+  </view>
+  <view class="form-group">
+    <input class="weui-input" placeholder="密码" password="true" bindinput="onPasswordInput" value="{{password}}" />
+  </view>
+  <button class="weui-btn weui-btn_primary" loading="{{loading}}" bindtap="login">登录</button>
+</view>

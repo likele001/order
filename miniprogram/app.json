@@ -1,0 +1,58 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/tasks/tasks",
+    "pages/report/report",
+    "pages/records/records",
+    "pages/wage/wage",
+    "pages/login/login",
+    "pages/login/bind"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#4A90E2",
+    "navigationBarTitleText": "工厂报工",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F8F9FA"
+  },
+  "tabBar": {
+    "color": "#8A8A8A",
+    "selectedColor": "#4A90E2",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png"
+      },
+      {
+        "pagePath": "pages/tasks/tasks",
+        "text": "任务",
+        "iconPath": "images/task.png",
+        "selectedIconPath": "images/task-active.png"
+      },
+      {
+        "pagePath": "pages/report/report",
+        "text": "报工",
+        "iconPath": "images/report.png",
+        "selectedIconPath": "images/report-active.png"
+      },
+      {
+        "pagePath": "pages/records/records",
+        "text": "记录",
+        "iconPath": "images/record.png",
+        "selectedIconPath": "images/record-active.png"
+      },
+      {
+        "pagePath": "pages/wage/wage",
+        "text": "工资",
+        "iconPath": "images/wage.png",
+        "selectedIconPath": "images/wage-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

@@ -131,11 +131,16 @@ class Worker extends Frontend
      */
     public function report()
     {
+        // 兼容 GET 参数和 pathinfo 方式获取 allocation_id
+        $allocationId = $this->request->param('id') ?: $this->request->post('allocation_id');
+        file_put_contents('/tmp/report_debug.log', '[report] allocationId=' . var_export($allocationId, true) . "\n", FILE_APPEND);
         if (!$this->auth->isLogin()) {
             $this->redirect('index/user/login?url=' . urlencode($this->request->url()));
         }
+        if (!$allocationId) {
+            $this->error('未指定任务ID，无法报工');
+        }
         $workerId = $this->auth->id;
-        $allocationId = $this->request->get('id');
         $error = '';
         $success = '';
         if ($this->request->isPost()) {
@@ -171,7 +176,7 @@ class Worker extends Frontend
                     } else {
                         try {
                             Db::startTrans();
-                            Db::name('scanwork_report')->insert([
+                            $reportId = Db::name('scanwork_report')->insertGetId([
                                 'allocation_id' => $allocationId,
                                 'user_id' => $workerId,
                                 'quantity' => $quantity,
@@ -181,6 +186,32 @@ class Worker extends Frontend
                                 'createtime' => time(),
                                 'updatetime' => time()
                             ]);
+                            // 多图上传处理
+                            if (!empty($_FILES['images']) && is_array($_FILES['images']['tmp_name'])) {
+                                $dateDir = date('Y-m-d');
+                                $saveDir = ROOT_PATH . 'public/uploads/baogong/' . $dateDir . '/';
+                                if (!is_dir($saveDir)) {
+                                    mkdir($saveDir, 0777, true);
+                                }
+                                $count = 0;
+                                foreach ($_FILES['images']['tmp_name'] as $k => $tmp) {
+                                    if ($_FILES['images']['error'][$k] == 0) {
+                                        $ext = strtolower(pathinfo($_FILES['images']['name'][$k], PATHINFO_EXTENSION));
+                                        $allowExt = ['jpg','jpeg','png','gif','webp'];
+                                        if (!in_array($ext, $allowExt)) continue;
+                                        if ($_FILES['images']['size'][$k] > 10*1024*1024) continue; // 10M
+                                        if ($count >= 9) break;
+                                        $filename = uniqid() . '.' . $ext;
+                                        move_uploaded_file($tmp, $saveDir . $filename);
+                                        Db::name('scanwork_report_image')->insert([
+                                            'report_id' => $reportId,
+                                            'image_url' => '/uploads/baogong/' . $dateDir . '/' . $filename,
+                                            'createtime' => time()
+                                        ]);
+                                        $count++;
+                                    }
+                                }
+                            }
                             // 立即增加分工表的已报数量
                             Db::name('scanwork_allocation')->where('id', $allocationId)->setInc('reported_quantity', $quantity);
                             Db::commit();
@@ -270,7 +301,7 @@ class Worker extends Frontend
 
 
     /**
-     * 提交报工
+     * 提交报工（支持多图上传）
      */
     public function submit()
     {
@@ -310,6 +341,32 @@ class Worker extends Frontend
                     'createtime' => time(),
                     'updatetime' => time()
                 ]);
+                // 多图上传处理
+                if (!empty($_FILES['images']) && is_array($_FILES['images']['tmp_name'])) {
+                    $dateDir = date('Y-m-d');
+                    $saveDir = ROOT_PATH . 'public/uploads/baogong/' . $dateDir . '/';
+                    if (!is_dir($saveDir)) {
+                        mkdir($saveDir, 0777, true);
+                    }
+                    $count = 0;
+                    foreach ($_FILES['images']['tmp_name'] as $k => $tmp) {
+                        if ($_FILES['images']['error'][$k] == 0) {
+                            $ext = strtolower(pathinfo($_FILES['images']['name'][$k], PATHINFO_EXTENSION));
+                            $allowExt = ['jpg','jpeg','png','gif','webp'];
+                            if (!in_array($ext, $allowExt)) continue;
+                            if ($_FILES['images']['size'][$k] > 10*1024*1024) continue; // 10M
+                            if ($count >= 9) break;
+                            $filename = uniqid() . '.' . $ext;
+                            move_uploaded_file($tmp, $saveDir . $filename);
+                            Db::name('scanwork_report_image')->insert([
+                                'report_id' => $reportId,
+                                'image_url' => '/uploads/baogong/' . $dateDir . '/' . $filename,
+                                'createtime' => time()
+                            ]);
+                            $count++;
+                        }
+                    }
+                }
                 Db::commit();
                 $this->success('报工提交成功，等待审核确认');
             } catch (Exception $e) {
@@ -433,7 +490,7 @@ class Worker extends Frontend
                 ->field('r.*, o.order_no, p.name as product_name, m.name as model_name, pr.name as process_name, a.model_id, a.process_id')
                 ->order('r.createtime desc')
                 ->select();
-            // 计算工价和工资金额
+            // 计算工价和工资金额，并查图片
             foreach ($reports as &$report) {
                 $price = Db::name('scanwork_process_price')->where([
                     'model_id' => $report['model_id'],
@@ -446,6 +503,8 @@ class Worker extends Frontend
                 } else {
                     $report['wage'] = 0;
                 }
+                // 查图片
+                $report['images'] = Db::name('scanwork_report_image')->where('report_id', $report['id'])->select();
             }
             $this->view->assign([
                 'reports' => $reports
@@ -688,7 +747,7 @@ class Worker extends Frontend
             $this->redirect('index/user/login?url=' . urlencode($this->request->url()));
         }
         $workerId = $this->auth->id;
-        $taskId = $this->request->get('id');
+        $taskId = $this->request->param('id');
         $error = '';
         $success = '';
         if ($this->request->isPost()) {
@@ -793,4 +852,27 @@ class Worker extends Frontend
         return $this->view->fetch('worker/twage');
     }
 
+    /**
+     * 删除报工图片
+     */
+    public function delete_report_image($id)
+    {
+        if (!$this->auth->isLogin()) {
+            $this->error('请先登录');
+        }
+        $img = Db::name('scanwork_report_image')->find($id);
+        if (!$img) {
+            $this->error('图片不存在');
+        }
+        $report = Db::name('scanwork_report')->where('id', $img['report_id'])->find();
+        if (!$report || $report['user_id'] != $this->auth->id) {
+            $this->error('无权操作');
+        }
+        if ($report['status'] != 0) {
+            $this->error('已审核报工不能删除图片');
+        }
+        @unlink(ROOT_PATH . 'public' . $img['image_url']);
+        Db::name('scanwork_report_image')->delete($id);
+        $this->success('图片已删除');
+    }
 } 

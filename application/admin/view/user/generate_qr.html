@@ -1,0 +1,97 @@
+<div class="panel panel-default panel-intro">
+    {:build_heading()}
+
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">生成绑定二维码</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form id="qr-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+                            <div class="form-group">
+                                <label class="control-label col-xs-12 col-sm-2">选择员工:</label>
+                                <div class="col-xs-12 col-sm-8">
+                                    <select name="user_id" class="form-control" required>
+                                        <option value="">请选择员工</option>
+                                        {foreach $employees as $employee}
+                                        <option value="{$employee.id}">{$employee.nickname} ({$employee.username})</option>
+                                        {/foreach}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="control-label col-xs-12 col-sm-2">员工密码:</label>
+                                <div class="col-xs-12 col-sm-8">
+                                    <input type="password" name="password" class="form-control" placeholder="请输入员工密码" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group layer-footer">
+                                <label class="control-label col-xs-12 col-sm-2"></label>
+                                <div class="col-xs-12 col-sm-8">
+                                    <button type="submit" class="btn btn-success btn-embossed">生成二维码</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">二维码结果</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="qr-result" style="display: none;">
+                            <div class="alert alert-info">
+                                <strong>员工信息:</strong> <span id="employee-info"></span>
+                            </div>
+                            <div class="form-group">
+                                <label>二维码内容:</label>
+                                <textarea id="qr-content" class="form-control" rows="3" readonly></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>使用说明:</label>
+                                <div class="alert alert-warning">
+                                    <p>1. 复制上面的二维码内容</p>
+                                    <p>2. 使用在线二维码生成工具生成二维码</p>
+                                    <p>3. 让员工扫描二维码完成绑定</p>
+                                    <p>4. 二维码有效期为5分钟</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="qr-placeholder" class="text-center text-muted">
+                            <i class="fa fa-qrcode fa-3x"></i>
+                            <p>请选择员工并输入密码生成二维码</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(function() {
+    $('#qr-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        var formData = $(this).serialize();
+        
+        $.post('', formData, function(data) {
+            if (data.code === 1) {
+                $('#qr-result').show();
+                $('#qr-placeholder').hide();
+                $('#employee-info').text(data.data.nickname + ' (' + data.data.username + ')');
+                $('#qr-content').val(data.data.qr_content);
+            } else {
+                Toastr.error(data.msg);
+            }
+        });
+    });
+});
+</script> 

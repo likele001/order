@@ -172,4 +172,33 @@ class Report extends Backend
         }
         return json(['code' => 1, 'data' => $data]);
     }
+
+    /**
+     * 查看报工详情，展示图片
+     */
+    public function view($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error('报工记录不存在');
+        }
+        $images = \think\Db::name('scanwork_report_image')->where('report_id', $row->id)->select();
+        $this->view->assign('images', $images);
+        $this->view->assign('row', $row);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 删除报工图片（后台）
+     */
+    public function delete_image($id)
+    {
+        $img = \think\Db::name('scanwork_report_image')->find($id);
+        if (!$img) {
+            $this->error('图片不存在');
+        }
+        @unlink(ROOT_PATH . 'public' . $img['image_url']);
+        \think\Db::name('scanwork_report_image')->delete($id);
+        $this->success('图片已删除');
+    }
 }

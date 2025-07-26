@@ -1,0 +1,32 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">报工详情</h3>
+  </div>
+  <div class="panel-body">
+    <table class="table table-bordered">
+      <tr><th>ID</th><td>{$row.id}</td></tr>
+      <tr><th>订单号</th><td>{$row.allocation.order.order_no|default='-'}</td></tr>
+      <tr><th>产品</th><td>{$row.allocation.model.product.name|default='-'}</td></tr>
+      <tr><th>型号</th><td>{$row.allocation.model.name|default='-'}</td></tr>
+      <tr><th>工序</th><td>{$row.allocation.process.name|default='-'}</td></tr>
+      <tr><th>员工</th><td>{$row.user.nickname|default='-'}</td></tr>
+      <tr><th>报工数量</th><td>{$row.quantity}</td></tr>
+      <tr><th>工资</th><td>{$row.wage}</td></tr>
+      <tr><th>备注</th><td>{$row.remark|default=''}</td></tr>
+      <tr><th>创建时间</th><td>{$row.createtime|date='Y-m-d H:i',###}</td></tr>
+      <tr><th>图片</th>
+        <td>
+          {volist name="images" id="img"}
+            <div style="display:inline-block;text-align:center;margin:2px;">
+              <a href="{$img.image_url}" target="_blank">
+                <img src="{$img.image_url}" style="width:80px;height:80px;object-fit:cover;border-radius:4px;">
+              </a><br>
+              <a href="{:url('scanwork/report/delete_image', ['id'=>$img.id])}" onclick="return confirm('确定删除该图片？');" style="color:red;font-size:16px;">删除</a>
+            </div>
+          {/volist}
+        </td>
+      </tr>
+    </table>
+    <a href="javascript:history.back();" class="btn btn-default">返回</a>
+  </div>
+</div> 

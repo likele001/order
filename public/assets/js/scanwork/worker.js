@@ -470,4 +470,40 @@ $(document).ready(function() {
     if (window.location.pathname.indexOf('scan') > -1) {
         ScanWorkWorker.initScan();
     }
+    // 报工表单一次性提交图片和数据
+    var reportForm = document.getElementById('reportForm');
+    if(reportForm){
+        reportForm.addEventListener('submit', function(e){
+            e.preventDefault();
+            var input = document.getElementById('images');
+            var files = input && input.files ? Array.from(input.files) : [];
+            if(files.length > 9){
+                alert('最多只能上传9张图片');
+                return;
+            }
+            for(let i=0;i<files.length;i++){
+                if(files[i].size > 10*1024*1024){
+                    alert('图片不能超过10M');
+                    return;
+                }
+            }
+            var formData = new FormData(reportForm);
+            var btn = reportForm.querySelector('button[type=submit]');
+            var originalText = btn.innerHTML;
+            btn.innerHTML = '提交中...';
+            btn.disabled = true;
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            }).then(resp => resp.text()).then(function(html){
+                // 简单处理：页面刷新或跳转
+                document.open();document.write(html);document.close();
+            }).catch(function(){
+                alert('提交失败，请重试');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        });
+    }
 }); 

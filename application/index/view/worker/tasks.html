@@ -36,7 +36,7 @@
           </div>
         </div>
         <div class="mt-4 md:mt-0 md:ml-6 flex-shrink-0 flex flex-col items-end">
-          <a href="{:url('worker/report', ['id'=>$task.id])}" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-bold text-base w-full md:w-auto justify-center">
+          <a href="{:url('worker/report', ['id'=>$task.id], true, true)}" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-bold text-base w-full md:w-auto justify-center">
             <i class="fa fa-edit mr-2"></i> 报工
           </a>
           <span class="text-xs text-gray-400 mt-2">待报数量：{$task.remaining_quantity|default=$task.quantity}</span>

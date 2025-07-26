@@ -1,0 +1,80 @@
+<view class="container">
+  <view class="header">
+    <text class="title">工资统计</text>
+    <text class="subtitle">{{month}} 月份工资明细</text>
+  </view>
+
+  <view class="summary-card">
+    <view class="summary-header">
+      <text class="summary-title">本月汇总</text>
+    </view>
+    <view class="summary-content">
+      <view class="total-wage">
+        <text class="wage-label">总工资</text>
+        <text class="wage-amount">¥{{totalWage}}</text>
+      </view>
+      <view class="wage-stats">
+        <view class="stat-item">
+          <text class="stat-number">{{wages.length}}</text>
+          <text class="stat-label">报工次数</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">{{averageWage}}</text>
+          <text class="stat-label">平均工资</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="wage-list" wx:if="{{wages.length > 0}}">
+    <view class="list-header">
+      <text class="list-title">工资明细</text>
+    </view>
+    
+    <view class="wage-item" wx:for="{{wages}}" wx:key="id">
+      <view class="wage-header">
+        <view class="wage-info">
+          <text class="product-name">{{item.product_name}} - {{item.model_name}}</text>
+          <text class="order-no">{{item.order_no}}</text>
+        </view>
+        <view class="wage-amount-item">¥{{item.wage}}</view>
+      </view>
+      
+      <view class="wage-details">
+        <view class="detail-row">
+          <text class="label">工序:</text>
+          <text class="value">{{item.process_name}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="label">数量:</text>
+          <text class="value">{{item.quantity}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="label">时间:</text>
+          <text class="value">{{formatTime(item.createtime)}}</text>
+        </view>
+        <view class="detail-row" wx:if="{{item.remark}}">
+          <text class="label">备注:</text>
+          <text class="value">{{item.remark}}</text>
+        </view>
+      </view>
+      
+      <view class="wage-status">
+        <view class="status-badge {{item.status == 1 ? 'confirmed' : 'pending'}}">
+          {{item.status == 1 ? '已确认' : '待确认'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <view class="empty-icon">💰</view>
+    <text class="empty-title">暂无工资记录</text>
+    <text class="empty-desc">{{month}} 月份还没有工资数据</text>
+  </view>
+
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

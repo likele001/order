@@ -1,0 +1,88 @@
+<view class="container">
+  <view class="header">
+    <text class="title">提交报工</text>
+    <text class="subtitle">完成任务并提交报工</text>
+  </view>
+
+  <view class="task-info" wx:if="{{task}}">
+    <view class="task-card">
+      <view class="task-header">
+        <text class="task-title">{{task.product_name}} - {{task.model_name}}</text>
+        <view class="task-status">待报工</view>
+      </view>
+      
+      <view class="task-details">
+        <view class="detail-row">
+          <text class="label">订单号:</text>
+          <text class="value">{{task.order_no}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="label">工序:</text>
+          <text class="value">{{task.process_name}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="label">分配数量:</text>
+          <text class="value">{{task.quantity}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-section">
+    <view class="form-card">
+      <view class="form-title">报工信息</view>
+      
+      <view class="form-item">
+        <text class="form-label">报工数量 *</text>
+        <input class="form-input" 
+               type="number" 
+               placeholder="请输入报工数量" 
+               value="{{quantity}}"
+               bindinput="onQuantityInput" />
+      </view>
+      
+      <view class="form-item">
+        <text class="form-label">备注</text>
+        <textarea class="form-textarea" 
+                  placeholder="请输入备注信息（可选）" 
+                  value="{{remark}}"
+                  bindinput="onRemarkInput" />
+      </view>
+    </view>
+  </view>
+
+  <view class="image-section">
+    <view class="image-card">
+      <view class="image-header">
+        <text class="image-title">上传图片</text>
+        <text class="image-desc">可上传工作现场照片（可选）</text>
+      </view>
+      
+      <view class="image-list">
+        <view class="image-item" wx:for="{{images}}" wx:key="*this">
+          <image src="{{item}}" mode="aspectFill" class="preview-image" />
+          <view class="image-delete" bindtap="removeImage" data-idx="{{index}}">×</view>
+        </view>
+        
+        <view class="image-upload" bindtap="chooseImage" wx:if="{{images.length < 9}}">
+          <text class="upload-icon">+</text>
+          <text class="upload-text">添加图片</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="submit-section">
+    <button class="submit-btn" 
+            bindtap="submitReport" 
+            loading="{{uploading}}"
+            disabled="{{!quantity}}">
+      {{uploading ? '提交中...' : '提交报工'}}
+    </button>
+  </view>
+
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

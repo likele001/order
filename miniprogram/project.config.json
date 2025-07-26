@@ -1,0 +1,14 @@
+{
+  "miniprogramRoot": "",
+  "projectname": "scanwork",
+  "description": "工厂报工系统微信小程序",
+  "appid": "your-app-id",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "postcss": true,
+    "minified": true
+  },
+  "compileType": "miniprogram",
+  "libVersion": "2.0.4"
+}

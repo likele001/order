@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>企业报工系统流程图</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <style>
+    .step-box { border-radius: 8px; border: 2px solid #2196f3; background: #e3f2fd; padding: 18px 16px; margin-bottom: 18px; }
+    .step-title { font-weight: bold; color: #1565c0; font-size: 1.2rem; }
+    .step-desc { color: #333; margin-top: 6px; }
+    .arrow { font-size: 2.2rem; color: #2196f3; text-align: center; }
+    .highlight { background: #fffde7; border-color: #ffb300; }
+    .highlight .step-title { color: #ff9800; }
+    .flow-section { margin-bottom: 32px; }
+    .flow-label { font-size: 1.1rem; color: #1976d2; font-weight: bold; margin-bottom: 10px; }
+    @media (max-width: 600px) { .arrow { font-size: 1.5rem; } }
+  </style>
+</head>
+<body class="bg-light">
+<div class="container py-4">
+  <h2 class="mb-4 text-center text-primary font-weight-bold">企业报工系统全流程图</h2>
+  <div class="row flow-section">
+    <div class="col-12 flow-label">后台管理端</div>
+    <div class="col-md-4 step-box">
+      <div class="step-title">1. 维护基础数据</div>
+      <div class="step-desc">添加/维护订单、产品、型号、工序等信息，为后续分工和报工打基础。</div>
+    </div>
+    <div class="col-md-1 arrow d-none d-md-block">→</div>
+    <div class="col-md-4 step-box">
+      <div class="step-title">2. 工序工价维护</div>
+      <div class="step-desc">为每个型号+工序设置计件单价（必填），如有计时需求可设置工时单价。</div>
+    </div>
+    <div class="col-md-1 arrow d-none d-md-block">→</div>
+    <div class="col-md-4 step-box highlight">
+      <div class="step-title">3. 分工分配</div>
+      <div class="step-desc">管理员为员工分配计件/计时任务，指定订单、型号、工序、数量/工时、员工、日期等。</div>
+    </div>
+  </div>
+  <div class="row flow-section">
+    <div class="col-12 flow-label">前台员工端</div>
+    <div class="col-md-4 step-box highlight">
+      <div class="step-title">4. 员工报工</div>
+      <div class="step-desc">员工登录后，查看分工任务，选择任务填写报工数量（计件）或工时（计时），提交报工。</div>
+    </div>
+    <div class="col-md-1 arrow d-none d-md-block">→</div>
+    <div class="col-md-4 step-box">
+      <div class="step-title">5. 查看报工记录</div>
+      <div class="step-desc">员工可随时查看自己的报工记录、审核状态和工资明细。</div>
+    </div>
+    <div class="col-md-1 arrow d-none d-md-block">→</div>
+    <div class="col-md-4 step-box">
+      <div class="step-title">6. 工资统计</div>
+      <div class="step-desc">员工可实时查看自己的工资汇总，支持按天、月统计。</div>
+    </div>
+  </div>
+  <div class="row flow-section">
+    <div class="col-12 flow-label">后台审核与工资汇总</div>
+    <div class="col-md-4 step-box highlight">
+      <div class="step-title">7. 报工审核</div>
+      <div class="step-desc">管理员在报工管理页面审核员工报工，点击“审核通过”或“拒绝”。</div>
+    </div>
+    <div class="col-md-1 arrow d-none d-md-block">→</div>
+    <div class="col-md-4 step-box">
+      <div class="step-title">8. 工资自动汇总</div>
+      <div class="step-desc">审核通过后，系统自动汇总工资到工资统计表，工资页面实时更新。</div>
+    </div>
+    <div class="col-md-1 arrow d-none d-md-block">→</div>
+    <div class="col-md-4 step-box">
+      <div class="step-title">9. 工资导出/发薪</div>
+      <div class="step-desc">管理员可导出工资数据，进行发薪或统计分析。</div>
+    </div>
+  </div>
+  <div class="alert alert-info mt-4">
+    <b>操作提示：</b><br>
+    ① 先维护好基础数据和工价，再分工分配。<br>
+    ② 员工报工后需管理员审核，审核通过后工资自动汇总。<br>
+    ③ 支持计件为主、计时为辅的多种生产场景。<br>
+    ④ 所有流程均有权限控制，支持多角色协作。
+  </div>
+</div>
+</body>
+</html> 

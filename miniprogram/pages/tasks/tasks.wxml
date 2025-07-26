@@ -1,0 +1,52 @@
+<view class="container">
+  <view class="header">
+    <text class="title">我的任务</text>
+    <text class="subtitle">今日待完成任务</text>
+  </view>
+
+  <view class="tasks-list" wx:if="{{tasks.length > 0}}">
+    <view class="task-card" wx:for="{{tasks}}" wx:key="id" bindtap="goReport" data-id="{{item.id}}">
+      <view class="task-header">
+        <view class="task-status pending">待完成</view>
+        <text class="task-id">#{{item.id}}</text>
+      </view>
+      
+      <view class="task-content">
+        <view class="task-title">{{item.product_name}} - {{item.model_name}}</view>
+        <view class="task-details">
+          <view class="detail-item">
+            <text class="label">订单号:</text>
+            <text class="value">{{item.order_no}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="label">工序:</text>
+            <text class="value">{{item.process_name}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="label">数量:</text>
+            <text class="value">{{item.quantity}}</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="task-footer">
+        <text class="task-time">分配时间: {{formatTime(item.createtime)}}</text>
+        <view class="task-action">
+          <text class="action-text">点击报工</text>
+          <text class="action-arrow">→</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <view class="empty-icon">📋</view>
+    <text class="empty-title">暂无任务</text>
+    <text class="empty-desc">今天没有待完成的任务</text>
+  </view>
+
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

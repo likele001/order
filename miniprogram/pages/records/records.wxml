@@ -1,0 +1,67 @@
+<view class="container">
+  <view class="header">
+    <text class="title">报工记录</text>
+    <text class="subtitle">查看历史报工记录</text>
+  </view>
+
+  <view class="records-list" wx:if="{{records.length > 0}}">
+    <view class="record-card" wx:for="{{records}}" wx:key="id">
+      <view class="record-header">
+        <view class="record-info">
+          <text class="order-no">{{item.order_no || '未知订单'}}</text>
+          <text class="record-time">{{item.createtime ? formatTime(item.createtime) : '未知时间'}}</text>
+        </view>
+        <view class="status-badge {{item.status == 1 ? 'confirmed' : 'pending'}}">
+          {{item.status == 1 ? '已确认' : '待确认'}}
+        </view>
+      </view>
+      
+      <view class="record-content">
+        <view class="product-title">{{item.product_name || '未知产品'}} - {{item.model_name || '未知型号'}}</view>
+        
+        <view class="record-details">
+          <view class="detail-row">
+            <text class="label">工序:</text>
+            <text class="value">{{item.process_name || '未知'}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="label">报工数量:</text>
+            <text class="value">{{item.quantity}}</text>
+          </view>
+          <view class="detail-row">
+            <text class="label">工资:</text>
+            <text class="value wage">¥{{item.wage}}</text>
+          </view>
+          <view class="detail-row" wx:if="{{item.remark}}">
+            <text class="label">备注:</text>
+            <text class="value">{{item.remark}}</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 图片展示 -->
+      <view class="image-section" wx:if="{{item.images && item.images.length > 0}}">
+        <view class="image-header">
+          <text class="image-title">工作图片</text>
+          <text class="image-count">{{item.images.length}}张</text>
+        </view>
+        <view class="image-list">
+          <image wx:for="{{item.images}}" wx:key="*this" wx:for-item="img" 
+                 src="{{img}}" mode="aspectFill" class="record-image" 
+                 bindtap="previewImage" data-urls="{{item.images}}" data-current="{{img}}"/>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <view class="empty-icon">📊</view>
+    <text class="empty-title">暂无报工记录</text>
+    <text class="empty-desc">还没有提交过报工记录</text>
+  </view>
+
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

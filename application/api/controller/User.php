@@ -14,7 +14,7 @@ use think\Validate;
  */
 class User extends Api
 {
-    protected $noNeedLogin = ['login', 'mobilelogin', 'register', 'resetpwd', 'changeemail', 'changemobile', 'third'];
+    protected $noNeedLogin = ['login', 'mobilelogin', 'register', 'resetpwd', 'changeemail', 'changemobile', 'third', 'miniprogram_login', 'bind_account', 'employee_list'];
     protected $noNeedRight = '*';
 
     public function _initialize()
@@ -36,11 +36,7 @@ class User extends Api
     }
 
     /**
-     * 会员登录
-     *
-     * @ApiMethod (POST)
-     * @ApiParams (name="account", type="string", required=true, description="账号")
-     * @ApiParams (name="password", type="string", required=true, description="密码")
+     * 会员登录（账号+密码）
      */
     public function login()
     {
@@ -60,10 +56,6 @@ class User extends Api
 
     /**
      * 手机验证码登录
-     *
-     * @ApiMethod (POST)
-     * @ApiParams (name="mobile", type="string", required=true, description="手机号")
-     * @ApiParams (name="captcha", type="string", required=true, description="验证码")
      */
     public function mobilelogin()
     {
@@ -72,7 +64,7 @@ class User extends Api
         if (!$mobile || !$captcha) {
             $this->error(__('Invalid parameters'));
         }
-        if (!Validate::regex($mobile, "^1\d{10}$")) {
+        if (!Validate::regex($mobile, "^1\\d{10}$")) {
             $this->error(__('Mobile is incorrect'));
         }
         if (!Sms::check($mobile, $captcha, 'mobilelogin')) {
@@ -83,7 +75,6 @@ class User extends Api
             if ($user->status != 'normal') {
                 $this->error(__('Account is locked'));
             }
-            //如果已经有账号则直接登录
             $ret = $this->auth->direct($user->id);
         } else {
             $ret = $this->auth->register($mobile, Random::alnum(), '', $mobile, []);
@@ -99,13 +90,6 @@ class User extends Api
 
     /**
      * 注册会员
-     *
-     * @ApiMethod (POST)
-     * @ApiParams (name="username", type="string", required=true, description="用户名")
-     * @ApiParams (name="password", type="string", required=true, description="密码")
-     * @ApiParams (name="email", type="string", required=true, description="邮箱")
-     * @ApiParams (name="mobile", type="string", required=true, description="手机号")
-     * @ApiParams (name="code", type="string", required=true, description="验证码")
      */
     public function register()
     {
@@ -120,7 +104,7 @@ class User extends Api
         if ($email && !Validate::is($email, "email")) {
             $this->error(__('Email is incorrect'));
         }
-        if ($mobile && !Validate::regex($mobile, "^1\d{10}$")) {
+        if ($mobile && !Validate::regex($mobile, "^1\\d{10}$")) {
             $this->error(__('Mobile is incorrect'));
         }
         $ret = Sms::check($mobile, $code, 'register');
@@ -344,5 +328,305 @@ class User extends Api
         } else {
             $this->error($this->auth->getError());
         }
+    }
+
+    /**
+     * 小程序登录（微信code换openid，查找/注册用户，标准token写入）
+     */
+    public function miniprogram_login()
+    {
+        $code = $this->request->post('code');
+        if (!$code) {
+            $this->error('缺少code');
+        }
+        $appid = 'wxccf32ba082446a3d';
+        $secret = '8e915b95f27972e1b64f2891d18186c5';
+        $url = "https://api.weixin.qq.com/sns/jscode2session?appid={$appid}&secret={$secret}&js_code={$code}&grant_type=authorization_code";
+        $res = json_decode(file_get_contents($url), true);
+        if (empty($res['openid'])) {
+            $this->error('微信登录失败', null, $res);
+        }
+        $openid = $res['openid'];
+        $user = \app\common\model\User::get(['openid' => $openid]);
+        if (!$user) {
+            // 注册新用户
+            $username = 'wx_' . \fast\Random::alnum(8);
+            $user = \app\common\model\User::create([
+                'username' => $username,
+                'nickname' => '微信用户',
+                'openid' => $openid,
+                'createtime' => time(),
+                'logintime' => time(),
+                'status' => 'normal'
+            ]);
+        }
+        // 标准token写入
+        $this->auth->direct($user->id);
+        $data = ['userinfo' => $this->auth->getUserinfo()];
+        $this->success('登录成功', $data, 0);
+    }
+
+    /**
+     * 微信用户绑定已有员工账号（标准token写入）
+     */
+    public function bind_account()
+    {
+        $openid = $this->request->post('openid');
+        $account = $this->request->post('account');
+        $password = $this->request->post('password');
+        if (!$openid || !$account || !$password) {
+            $this->error('参数不完整');
+        }
+        $user = \app\common\model\User::where('group_id', 2)->where(function($query) use ($account) {
+            $query->where('username', $account)->whereOr('mobile', $account);
+        })->find();
+        if (!$user) {
+            $this->error('员工账号不存在或不属于员工组');
+        }
+        if ($user['password'] !== md5(md5($password) . $user['salt'])) {
+            $this->error('密码错误');
+        }
+        // 绑定 openid
+        $user->openid = $openid;
+        $user->save();
+        // 标准token写入
+        $this->auth->direct($user->id);
+        $data = ['userinfo' => $this->auth->getUserinfo()];
+        $this->success('绑定成功', $data, 0);
+    }
+
+    /**
+     * 获取员工账号列表（group_id=2）
+     * @ApiMethod (GET)
+     */
+    public function employee_list()
+    {
+        $list = \think\Db::name('user')
+            ->where('group_id', 2)
+            ->field('id,username,nickname,mobile')
+            ->select();
+        $this->success('员工列表', $list, 0);
+    }
+
+    /**
+     * 生成员工绑定二维码
+     * @ApiMethod (POST)
+     */
+    public function generate_bind_qr()
+    {
+        $username = $this->request->post('username');
+        $password = $this->request->post('password');
+        
+        if (!$username || !$password) {
+            $this->error('参数不完整');
+        }
+        
+        // 验证员工账号
+        $user = \think\Db::name('user')
+            ->where('group_id', 2)
+            ->where(function($query) use ($username) {
+                $query->where('username', $username)->whereOr('mobile', $username);
+            })
+            ->find();
+            
+        if (!$user) {
+            $this->error('员工账号不存在或不属于员工组');
+        }
+        
+        if ($user['password'] !== md5(md5($password) . $user['salt'])) {
+            $this->error('密码错误');
+        }
+        
+        // 生成绑定二维码内容
+        $qrContent = "bind:{$username}:{$password}";
+        
+        // 这里可以集成二维码生成库，暂时返回内容
+        $data = [
+            'qr_content' => $qrContent,
+            'username' => $user['username'],
+            'nickname' => $user['nickname'],
+            'expire_time' => time() + 300 // 5分钟有效期
+        ];
+        
+        $this->success('二维码生成成功', $data, 0);
+    }
+
+    /**
+     * 生成绑定token（PC端调用）
+     * @ApiMethod (POST)
+     */
+    public function generate_bind_token()
+    {
+        if (!$this->auth->isLogin()) {
+            $this->error('请先登录');
+        }
+        
+        $user_id = $this->auth->id;
+        
+        // 检查是否已经是员工
+        $user = \think\Db::name('user')->where('id', $user_id)->find();
+        if ($user['group_id'] != 2) {
+            $this->error('只有员工账号才能生成绑定token');
+        }
+        
+        // 生成唯一token
+        $token = md5(uniqid() . time() . rand(1000, 9999));
+        $expire_time = time() + 300; // 5分钟有效期
+        
+        // 保存token
+        \think\Db::name('user_bind_token')->insert([
+            'token' => $token,
+            'user_id' => $user_id,
+            'status' => 0,
+            'expire_time' => $expire_time,
+            'createtime' => time(),
+            'updatetime' => time()
+        ]);
+        
+        // 生成二维码内容
+        $qrContent = "bind_token:{$token}";
+        
+        $this->success('生成成功', [
+            'token' => $token,
+            'qr_content' => $qrContent,
+            'expire_time' => $expire_time,
+            'user_info' => [
+                'username' => $user['username'],
+                'nickname' => $user['nickname']
+            ]
+        ], 0);
+    }
+
+    /**
+     * 通过token绑定（小程序调用）
+     * @ApiMethod (POST)
+     */
+    public function bind_by_token()
+    {
+        $token = $this->request->post('token');
+        $openid = $this->request->post('openid');
+        
+        if (!$token || !$openid) {
+            $this->error('参数不完整');
+        }
+        
+        // 查找并验证token
+        $bindToken = \think\Db::name('user_bind_token')
+            ->where('token', $token)
+            ->where('status', 0)
+            ->where('expire_time', '>', time())
+            ->find();
+            
+        if (!$bindToken) {
+            $this->error('绑定token无效或已过期');
+        }
+        
+        // 获取员工信息
+        $user = \think\Db::name('user')->where('id', $bindToken['user_id'])->find();
+        if (!$user || $user['group_id'] != 2) {
+            $this->error('员工账号不存在');
+        }
+        
+        try {
+            \think\Db::startTrans();
+            
+            // 更新token状态
+            \think\Db::name('user_bind_token')
+                ->where('id', $bindToken['id'])
+                ->update([
+                    'openid' => $openid,
+                    'status' => 1,
+                    'updatetime' => time()
+                ]);
+            
+            // 更新用户openid
+            \think\Db::name('user')
+                ->where('id', $user['id'])
+                ->update([
+                    'openid' => $openid,
+                    'updatetime' => time()
+                ]);
+            
+            \think\Db::commit();
+            
+            $this->success('绑定成功', [
+                'userinfo' => [
+                    'id' => $user['id'],
+                    'username' => $user['username'],
+                    'nickname' => $user['nickname'],
+                    'group_id' => $user['group_id'],
+                    'openid' => $openid
+                ]
+            ], 0);
+            
+        } catch (\Exception $e) {
+            \think\Db::rollback();
+            $this->error('绑定失败：' . $e->getMessage());
+        }
+    }
+
+    /**
+     * 查询绑定状态（PC端轮询）
+     * @ApiMethod (GET)
+     */
+    public function bind_status()
+    {
+        $token = $this->request->get('token');
+        
+        if (!$token) {
+            $this->error('参数不完整');
+        }
+        
+        $bindToken = \think\Db::name('user_bind_token')
+            ->where('token', $token)
+            ->find();
+            
+        if (!$bindToken) {
+            $this->error('token不存在');
+        }
+        
+        if ($bindToken['expire_time'] < time()) {
+            $this->error('token已过期');
+        }
+        
+        $status = $bindToken['status'];
+        $data = [
+            'status' => $status, // 0未使用，1已使用，2已过期
+            'expire_time' => $bindToken['expire_time']
+        ];
+        
+        if ($status == 1) {
+            // 已绑定，返回用户信息
+            $user = \think\Db::name('user')->where('id', $bindToken['user_id'])->find();
+            $data['user_info'] = [
+                'username' => $user['username'],
+                'nickname' => $user['nickname']
+            ];
+        }
+        
+        $this->success('查询成功', $data, 0);
+    }
+
+    /**
+     * 解绑账号
+     * @ApiMethod (POST)
+     */
+    public function unbind_account()
+    {
+        if (!$this->auth->isLogin()) {
+            $this->error('请先登录');
+        }
+        
+        $user_id = $this->auth->id;
+        
+        // 清除openid
+        \think\Db::name('user')
+            ->where('id', $user_id)
+            ->update([
+                'openid' => '',
+                'updatetime' => time()
+            ]);
+        
+        $this->success('解绑成功');
     }
 }

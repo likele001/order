@@ -48,7 +48,7 @@ class WorkerTtime extends Frontend
             $this->redirect('index/user/login?url=' . urlencode($this->request->url()));
         }
         $workerId = $this->auth->id;
-        $taskId = $this->request->get('id');
+        $taskId = $this->request->param('id');
         $error = '';
         $success = '';
         if ($this->request->isPost()) {

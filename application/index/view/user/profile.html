@@ -1,200 +1,318 @@
-<style>
-    .profile-avatar-container {
-        position:relative;
-        width:100px;
-    }
-    .profile-avatar-container .profile-user-img{
-        width:100px;
-        height:100px;
-    }
-    .profile-avatar-container .profile-avatar-text {
-        display:none;
-    }
-    .profile-avatar-container:hover .profile-avatar-text {
-        display:block;
-        position:absolute;
-        height:100px;
-        width:100px;
-        background:#444;
-        opacity: .6;
-        color: #fff;
-        top:0;
-        left:0;
-        line-height: 100px;
-        text-align: center;
-    }
-    .profile-avatar-container button{
-        position:absolute;
-        top:0;left:0;width:100px;height:100px;opacity: 0;
-    }
-</style>
-<div id="content-container" class="container">
-    <div class="row">
-        <div class="col-md-3">
-            {include file="common/sidenav" /}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 员工报工系统</title>
+    <link rel="stylesheet" href="/assets/css/frontend.css">
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .profile-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #4A90E2;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: bold;
+            margin: 0 auto 20px;
+        }
+        .profile-info {
+            margin-bottom: 30px;
+        }
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #333;
+        }
+        .info-value {
+            color: #666;
+        }
+        .bind-section {
+            text-align: center;
+            padding: 30px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .bind-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .bind-desc {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .bind-btn {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .bind-btn:hover {
+            background: #357ABD;
+        }
+        .bind-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .qr-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .qr-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .qr-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .qr-code {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .qr-tips {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        .bind-status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .bind-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .bind-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .bind-status.pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    {$user.nickname|substr=0,1|strtoupper}
+                </div>
+                <h2>{$user.nickname}</h2>
+                <p>员工账号</p>
+            </div>
+            
+            <div class="profile-info">
+                <div class="info-item">
+                    <span class="info-label">用户名：</span>
+                    <span class="info-value">{$user.username}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">手机号：</span>
+                    <span class="info-value">{$user.mobile}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">邮箱：</span>
+                    <span class="info-value">{$user.email}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">注册时间：</span>
+
+                </div>
+            </div>
+            
+            <div class="bind-section">
+                <div class="bind-title">绑定小程序</div>
+                <div class="bind-desc">
+                    扫描二维码绑定微信小程序，可在手机上使用报工功能
+                </div>
+                
+                <div id="bindStatus" class="bind-status" style="display: none;"></div>
+                
+                <button id="bindBtn" class="bind-btn" onclick="generateBindQR()">
+                    生成绑定二维码
+                </button>
+            </div>
         </div>
-        <div class="col-md-9">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <h2 class="page-header">{:__('Profile')}</h2>
-                    <form id="profile-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="{:url('api/user/profile')}">
-                        {:token()}
-                        <input type="hidden" name="avatar" id="c-avatar" value="{:$user->getData('avatar')}" />
-                        <div class="form-group">
-                            <label class="control-label col-xs-12 col-sm-2"></label>
-                            <div class="col-xs-12 col-sm-4">
-                                <div class="profile-avatar-container">
-                                    <img class="profile-user-img img-responsive img-circle" src="{$user.avatar|htmlentities|cdnurl}" alt="">
-                                    <div class="profile-avatar-text img-circle">{:__('Click to edit')}</div>
-                                    <button type="button" id="faupload-avatar" class="faupload" data-mimetype="png,jpg,jpeg,gif" data-input-id="c-avatar"><i class="fa fa-upload"></i> {:__('Upload')}</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-xs-12 col-sm-2">{:__('Username')}:</label>
-                            <div class="col-xs-12 col-sm-4">
-                                <input type="text" class="form-control" id="username" name="username" value="{$user.username|htmlentities}" data-rule="required;username;remote({:url('api/validate/check_username_available')}, id={$user.id})" placeholder="">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-xs-12 col-sm-2">{:__('Nickname')}:</label>
-                            <div class="col-xs-12 col-sm-4">
-                                <input type="text" class="form-control" id="nickname" name="nickname" value="{$user.nickname|htmlentities}" data-rule="required;remote({:url('api/validate/check_nickname_available')}, id={$user.id})" placeholder="">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="c-bio" class="control-label col-xs-12 col-sm-2">{:__('Intro')}:</label>
-                            <div class="col-xs-12 col-sm-8">
-                                <input id="c-bio" data-rule="" data-tip="一句话介绍一下你自己" class="form-control" name="bio" type="text" value="{$user.bio|htmlentities}">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="c-email" class="control-label col-xs-12 col-sm-2">{:__('Email')}:</label>
-                            <div class="col-xs-12 col-sm-4">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="c-email" name="email" value="{$user.email|htmlentities}" disabled placeholder="">
-                                    <span class="input-group-btn" style="padding:0;border:none;">
-                                        <a href="javascript:;" class="btn btn-info btn-change" data-type="email">{:__('Change')}</a>
-                                    </span>
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="c-mobile" class="control-label col-xs-12 col-sm-2">{:__('Mobile')}:</label>
-                            <div class="col-xs-12 col-sm-4">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="c-mobile" name="mobile" value="{$user.mobile|htmlentities}" disabled placeholder="">
-                                    <span class="input-group-btn" style="padding:0;border:none;">
-                                        <a href="javascript:;" class="btn btn-info btn-change" data-type="mobile">{:__('Change')}</a>
-                                    </span>
-                                </div>
-
-                            </div>
-                        </div>
-                        <div class="form-group normal-footer">
-                            <label class="control-label col-xs-12 col-sm-2"></label>
-                            <div class="col-xs-12 col-sm-8">
-                                <button type="submit" class="btn btn-primary btn-embossed disabled">{:__('Ok')}</button>
-                                <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
-                            </div>
-                        </div>
-                    </form>
+    </div>
+    
+    <!-- 二维码弹窗 -->
+    <div id="qrModal" class="qr-modal">
+        <div class="qr-content">
+            <span class="close-btn" onclick="closeQRModal()">&times;</span>
+            <div class="qr-title">请用小程序扫码绑定</div>
+            <div id="qrCode" class="qr-code">
+                <!-- 二维码将在这里显示 -->
+            </div>
+            <div class="qr-tips">
+                <p>1. 打开微信小程序</p>
+                <p>2. 进入"我的"页面</p>
+                <p>3. 点击"绑定员工账号"</p>
+                <p>4. 选择"扫码绑定"</p>
+                <p>5. 扫描此二维码完成绑定</p>
+            </div>
+            <div id="bindProgress" style="display: none;">
+                <p>正在等待小程序扫码...</p>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<script type="text/html" id="emailtpl">
-    <form id="email-form" class="form-horizontal form-layer" method="POST" action="{:url('api/user/changeemail')}">
-        <div class="form-body">
-            <input type="hidden" name="action" value="changeemail" />
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-3">{:__('New Email')}:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <input type="text" class="form-control" id="email" name="email" value="" data-rule="required;email;remote({:url('api/validate/check_email_available')}, event=changeemail, id={$user.id})" placeholder="{:__('New email')}">
-                    <span class="msg-box"></span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="control-label col-xs-12 col-sm-3">{:__('Captcha')}:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <div class="input-group">
-                        <input type="text" name="captcha" id="email-captcha" class="form-control" data-rule="required;length({$Think.config.captcha.length});digits;remote({:url('api/validate/check_ems_correct')}, event=changeemail, email:#email)" />
-                        <span class="input-group-btn" style="padding:0;border:none;">
-                            <a href="javascript:;" class="btn btn-info btn-captcha" data-url="{:url('api/ems/send')}" data-type="email" data-event="changeemail">获取验证码</a>
-                        </span>
-                    </div>
-                    <span class="msg-box"></span>
-                </div>
-            </div>
-        </div>
-        <div class="form-footer">
-            <div class="form-group" style="margin-bottom:0;">
-                <div class="col-xs-12 col-sm-8 col-sm-offset-3">
-                    <button type="submit" class="btn btn-md btn-primary">{:__('Submit')}</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</script>
-<script type="text/html" id="mobiletpl">
-    <form id="mobile-form" class="form-horizontal form-layer" method="POST" action="{:url('api/user/changemobile')}">
-        <div class="form-body">
-            <input type="hidden" name="action" value="changemobile" />
-            <div class="form-group">
-                <label for="c-mobile" class="control-label col-xs-12 col-sm-3">{:__('New mobile')}:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <input type="text" class="form-control" id="mobile" name="mobile" value="" data-rule="required;mobile;remote({:url('api/validate/check_mobile_available')}, event=changemobile, id={$user.id})" placeholder="{:__('New mobile')}">
-                    <span class="msg-box"></span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="mobile-captcha" class="control-label col-xs-12 col-sm-3">{:__('Captcha')}:</label>
-                <div class="col-xs-12 col-sm-8">
-                    <div class="input-group">
-                        <input type="text" name="captcha" id="mobile-captcha" class="form-control" data-rule="required;length({$Think.config.captcha.length});digits;remote({:url('api/validate/check_sms_correct')}, event=changemobile, mobile:#mobile)" />
-                        <span class="input-group-btn" style="padding:0;border:none;">
-                            <a href="javascript:;" class="btn btn-info btn-captcha" data-url="{:url('api/sms/send')}" data-type="mobile" data-event="changemobile">获取验证码</a>
-                        </span>
-                    </div>
-                    <span class="msg-box"></span>
-                </div>
-            </div>
-        </div>
-        <div class="form-footer">
-            <div class="form-group" style="margin-bottom:0;">
-                <div class="col-xs-12 col-sm-8 col-sm-offset-3">
-                    <button type="submit" class="btn btn-md btn-primary">{:__('Submit')}</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</script>
-<style>
-    .form-layer {height:100%;min-height:150px;min-width:300px;}
-    .form-body {
-        width:100%;
-        overflow:auto;
-        top:0;
-        position:absolute;
-        z-index:10;
-        bottom:50px;
-        padding:15px;
-    }
-    .form-layer .form-footer {
-        height:50px;
-        line-height:50px;
-        background-color: #ecf0f1;
-        width:100%;
-        position:absolute;
-        z-index:200;
-        bottom:0;
-        margin:0;
-    }
-    .form-footer .form-group{
-        margin-left:0;
-        margin-right:0;
-    }
-</style>
+    
+    <script src="/assets/js/jquery.min.js"></script>
+    <script>
+        let bindToken = '';
+        let bindTimer = null;
+        
+        // 生成绑定二维码
+        function generateBindQR() {
+            $('#bindBtn').prop('disabled', true).text('生成中...');
+            
+            $.post('/api/user/generate_bind_token', {
+                // 这里需要传递登录token，实际项目中应该从cookie或session获取
+            }, function(res) {
+                if (res.code === 0) {
+                    bindToken = res.data.token;
+                    showQRModal(res.data.qr_content);
+                    startBindCheck();
+                } else {
+                    alert(res.msg || '生成失败');
+                    $('#bindBtn').prop('disabled', false).text('生成绑定二维码');
+                }
+            }).fail(function() {
+                alert('网络错误');
+                $('#bindBtn').prop('disabled', false).text('生成绑定二维码');
+            });
+        }
+        
+        // 显示二维码弹窗
+        function showQRModal(qrContent) {
+            // 这里应该使用二维码生成库，暂时显示文本
+            $('#qrCode').html('<p style="font-family: monospace; font-size: 12px;">' + qrContent + '</p>');
+            $('#qrModal').show();
+            $('#bindBtn').prop('disabled', false).text('重新生成');
+        }
+        
+        // 关闭二维码弹窗
+        function closeQRModal() {
+            $('#qrModal').hide();
+            stopBindCheck();
+        }
+        
+        // 开始检查绑定状态
+        function startBindCheck() {
+            if (!bindToken) return;
+            
+            $('#bindProgress').show();
+            
+            bindTimer = setInterval(function() {
+                checkBindStatus();
+            }, 2000);
+        }
+        
+        // 停止检查绑定状态
+        function stopBindCheck() {
+            if (bindTimer) {
+                clearInterval(bindTimer);
+                bindTimer = null;
+            }
+            $('#bindProgress').hide();
+        }
+        
+        // 检查绑定状态
+        function checkBindStatus() {
+            $.get('/api/user/bind_status', { token: bindToken }, function(res) {
+                if (res.code === 0) {
+                    if (res.data.status === 1) {
+                        // 绑定成功
+                        stopBindCheck();
+                        showBindStatus('绑定成功！', 'success');
+                        setTimeout(function() {
+                            closeQRModal();
+                            location.reload();
+                        }, 2000);
+                    } else if (res.data.status === 2) {
+                        // 已过期
+                        stopBindCheck();
+                        showBindStatus('二维码已过期，请重新生成', 'error');
+                    }
+                }
+            });
+        }
+        
+        // 显示绑定状态
+        function showBindStatus(message, type) {
+            $('#bindStatus').removeClass('success error pending').addClass(type).text(message).show();
+        }
+        
+        // 页面加载完成
+        $(document).ready(function() {
+            // 检查是否已绑定
+            // 这里可以添加检查逻辑
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="user-card">
+    <view class="user-info">
+      <image class="avatar" src="{{user.avatar || '/images/default-avatar.png'}}" />
+      <view class="user-details">
+        <text class="username">{{user.nickname || '未登录'}}</text>
+        <text class="user-status" wx:if="{{user.group_id === 0}}">微信用户</text>
+        <text class="user-status" wx:elif="{{user.group_id === 2}}">员工账号</text>
+        <text class="user-status" wx:else>其他用户</text>
+      </view>
+    </view>
+    
+    <!-- 绑定状态 -->
+    <view class="bind-status" wx:if="{{user.group_id === 0}}">
+      <text class="bind-tip">请绑定员工账号以使用完整功能</text>
+      <button class="bind-btn" bindtap="goBind">绑定员工账号</button>
+    </view>
+    
+    <view class="bind-status" wx:elif="{{user.group_id === 2}}">
+      <text class="bind-tip">已绑定员工账号</text>
+      <button class="unbind-btn" bindtap="unbindAccount">解绑账号</button>
+    </view>
+  </view>
+
+  <!-- 今日统计 -->
+  <view class="stats-card">
+    <view class="stats-header">
+      <text class="stats-title">今日统计</text>
+      <text class="stats-date">{{today}}</text>
+    </view>
+    <view class="stats-grid">
+      <view class="stats-item">
+        <text class="stats-number">{{todayTaskCount}}</text>
+        <text class="stats-label">新任务</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-number">{{todayReportCount}}</text>
+        <text class="stats-label">已报工</text>
+      </view>
+      <view class="stats-item">
+        <text class="stats-number">¥{{todayWage}}</text>
+        <text class="stats-label">今日工资</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-grid">
+    <view class="menu-item" bindtap="goTasks">
+      <view class="menu-icon">📋</view>
+      <text class="menu-text">我的任务</text>
+    </view>
+    <view class="menu-item" bindtap="goRecords">
+      <view class="menu-icon">📝</view>
+      <text class="menu-text">报工记录</text>
+    </view>
+    <view class="menu-item" bindtap="goWage">
+      <view class="menu-icon">💰</view>
+      <text class="menu-text">工资统计</text>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view>

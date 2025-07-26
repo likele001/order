@@ -4,7 +4,7 @@ return array (
   'name' => '报工系统',
   'beian' => '',
   'cdnurl' => '',
-  'version' => '1.0.44',
+  'version' => '1.0.51',
   'timezone' => 'Asia/Shanghai',
   'forbiddenip' => '',
   'languages' => 

@@ -1,0 +1,85 @@
+<view class="container">
+  <view class="header">
+    <text class="title">绑定员工账号</text>
+    <text class="subtitle">请绑定您的FastAdmin员工账号</text>
+  </view>
+
+  <view class="bind-methods">
+    <view class="method-tabs">
+      <view class="tab-item {{bindMethod === 'scan' ? 'active' : ''}}" bindtap="switchMethod" data-method="scan">
+        <text class="tab-icon">📱</text>
+        <text class="tab-text">扫码绑定</text>
+      </view>
+      <view class="tab-item {{bindMethod === 'manual' ? 'active' : ''}}" bindtap="switchMethod" data-method="manual">
+        <text class="tab-icon">👤</text>
+        <text class="tab-text">手动绑定</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 扫码绑定 -->
+  <view class="scan-section" wx:if="{{bindMethod === 'scan'}}">
+    <view class="scan-card">
+      <view class="scan-header">
+        <text class="scan-title">扫描二维码绑定</text>
+        <text class="scan-desc">请扫描管理员提供的绑定二维码</text>
+      </view>
+      
+      <view class="scan-area" bindtap="scanQRCode">
+        <view class="scan-icon">📷</view>
+        <text class="scan-text">点击扫描二维码</text>
+      </view>
+      
+      <view class="scan-tips">
+        <text class="tip-text">• 请向管理员获取绑定二维码</text>
+        <text class="tip-text">• 二维码包含员工账号信息</text>
+        <text class="tip-text">• 扫描后自动完成绑定</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 手动绑定 -->
+  <view class="manual-section" wx:if="{{bindMethod === 'manual'}}">
+    <view class="bind-card">
+      <view class="bind-header">
+        <text class="bind-title">手动绑定账号</text>
+        <text class="bind-desc">选择员工账号并输入密码</text>
+      </view>
+      
+      <view class="form-item">
+        <text class="form-label">选择员工 *</text>
+        <picker mode="selector" 
+                range="{{employees}}" 
+                range-key="nickname" 
+                bindchange="onEmployeeChange"
+                class="form-picker">
+          <view class="picker-display">
+            <text class="picker-text">{{selectedIndex !== null ? employees[selectedIndex].nickname + ' (' + employees[selectedIndex].username + ')' : '请选择员工账号'}}</text>
+            <text class="picker-arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
+        <text class="form-label">密码 *</text>
+        <input class="form-input" 
+               type="password" 
+               placeholder="请输入员工密码" 
+               value="{{password}}"
+               bindinput="onPasswordInput" />
+      </view>
+      
+      <button class="bind-btn" 
+              bindtap="bindAccount" 
+              loading="{{loading}}"
+              disabled="{{selectedIndex === null || !password}}">
+        {{loading ? '绑定中...' : '绑定账号'}}
+      </button>
+    </view>
+  </view>
+
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">处理中...</text>
+  </view>
+</view> 

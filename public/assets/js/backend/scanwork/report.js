@@ -91,6 +91,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                 buttons.push('<a href="javascript:;" class="btn btn-xs btn-success btn-audit" title="审核"><i class="fa fa-check"></i> 审核</a> ');
                                 buttons.push('<a href="javascript:;" class="btn btn-xs btn-danger btn-reject" title="拒绝"><i class="fa fa-close"></i> 拒绝</a> ');
                             }
+                            // 详情按钮
+                            buttons.push('<a href="view/ids/' + row.id + '" class="btn btn-xs btn-info btn-detail" title="详情"><i class="fa fa-list"></i> 详情</a> ');
                             // 保留原有操作按钮
                             buttons.push(Table.api.formatter.operate.call(this, value, row, index));
                             return buttons.join(' ');

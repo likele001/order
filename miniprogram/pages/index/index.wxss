@@ -1,0 +1,203 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0;
+}
+
+/* 用户信息卡片 */
+.user-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 30rpx;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  margin-right: 24rpx;
+  background: #f0f0f0;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.username {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.user-status {
+  font-size: 26rpx;
+  color: #666;
+  display: block;
+}
+
+/* 绑定状态 */
+.bind-status {
+  border-top: 1rpx solid #f0f0f0;
+  padding-top: 30rpx;
+  text-align: center;
+}
+
+.bind-tip {
+  font-size: 28rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.bind-btn {
+  background: linear-gradient(135deg, #4A90E2, #7B68EE);
+  color: white;
+  border: none;
+  border-radius: 12rpx;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.unbind-btn {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 12rpx;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+/* 统计卡片 */
+.stats-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 0 30rpx 30rpx 30rpx;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+}
+
+.stats-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.stats-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.stats-date {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.stats-grid {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stats-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx;
+}
+
+.stats-number {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #4A90E2;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.stats-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 功能菜单 */
+.menu-grid {
+  display: flex;
+  justify-content: space-around;
+  margin: 0 30rpx 30rpx 30rpx;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16rpx;
+  padding: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+}
+
+.menu-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx;
+  transition: all 0.3s ease;
+}
+
+.menu-item:active {
+  transform: scale(0.95);
+}
+
+.menu-icon {
+  font-size: 60rpx;
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.menu-text {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 加载状态 */
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #f3f3f3;
+  border-top: 4rpx solid #4A90E2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
