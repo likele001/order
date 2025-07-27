@@ -1,0 +1,18 @@
+.container {
+  padding: 40rpx;
+}
+
+.form-group {
+  margin-bottom: 32rpx;
+}
+
+.weui-input {
+  border: 1px solid #eee;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  font-size: 32rpx;
+}
+
+.weui-btn {
+  margin-top: 32rpx;
+}

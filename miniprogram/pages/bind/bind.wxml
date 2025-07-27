@@ -1,0 +1,34 @@
+<!--pages/bind/bind.wxml-->
+<view class="container">
+  <view class="bind-card">
+    <view class="header">
+      <image class="icon" src="/images/bind-icon.png" mode="aspectFit"></image>
+      <view class="title">账号绑定确认</view>
+      <view class="subtitle">将您的微信账号绑定到当前登录的员工账号</view>
+    </view>
+
+    <view class="user-info" wx:if="{{userInfo}}">
+      <image class="avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill"></image>
+      <view class="nickname">{{userInfo.nickName}}</view>
+      <view class="desc">确认使用此微信账号进行绑定</view>
+    </view>
+
+    <view class="user-info" wx:else>
+      <view class="no-auth">
+        <image class="placeholder" src="/images/avatar-placeholder.png" mode="aspectFit"></image>
+        <view class="auth-text">需要授权获取用户信息</view>
+        <button class="auth-btn" bindtap="getUserInfo">授权获取</button>
+      </view>
+    </view>
+
+    <view class="actions">
+      <button 
+        class="confirm-btn" 
+        bindtap="confirmBind" 
+        loading="{{loading}}"
+        disabled="{{!userInfo || loading}}"
+      >确认绑定</button>
+      <button class="cancel-btn" bindtap="navigateBack">取消</button>
+    </view>
+  </view>
+</view>

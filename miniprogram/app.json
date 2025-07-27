@@ -6,7 +6,8 @@
     "pages/records/records",
     "pages/wage/wage",
     "pages/login/login",
-    "pages/login/bind"
+    "pages/login/bind",
+    "pages/bind/bind"
   ],
   "window": {
     "backgroundTextStyle": "light",

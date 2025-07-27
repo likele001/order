@@ -1,0 +1,20 @@
+<view class="container">
+  <view class="header">
+    <text class="title">我的记录</text>
+    <text class="subtitle">查看您的绑定记录和历史信息</text>
+  </view>
+
+  <view class="records-list">
+    <block wx:for="{{records}}" wx:key="index">
+      <view class="record-item">
+        <text class="record-title">{{item.title}}</text>
+        <text class="record-date">{{item.date}}</text>
+        <text class="record-status">{{item.status}}</text>
+      </view>
+    </block>
+  </view>
+
+  <view class="no-records" wx:if="{{records.length === 0}}">
+    <text>暂无记录</text>
+  </view>
+</view>

@@ -69,7 +69,16 @@ Page({
   
   // 去绑定页面
   goBind() {
-    wx.navigateTo({ url: '/pages/login/bind' });
+    const userInfo = getApp().globalData.userInfo;
+    if (!userInfo || !userInfo.id) {
+      wx.showToast({
+        title: '请先登录账号',
+        icon: 'none'
+      });
+      wx.navigateTo({ url: '/pages/login/login' });
+      return;
+    }
+    wx.navigateTo({ url: `/pages/bind/bind?bind=${userInfo.id}` });
   },
   
   // 解绑账号
@@ -84,7 +93,7 @@ Page({
       }
     });
   },
-  
+
   // 执行解绑
   doUnbind() {
     const userInfo = wx.getStorageSync('userInfo');
@@ -92,7 +101,6 @@ Page({
       wx.showToast({ title: '请先登录', icon: 'none' });
       return;
     }
-    
     wx.request({
       url: app.globalData.apiUrl + 'user/unbind_account',
       method: 'POST',
@@ -102,7 +110,6 @@ Page({
       success: res => {
         if (res.data.code === 0) {
           wx.showToast({ title: '解绑成功', icon: 'success' });
-          // 清除本地存储，重新登录
           wx.removeStorageSync('userInfo');
           setTimeout(() => {
             wx.reLaunch({ url: '/pages/login/login' });

@@ -1,0 +1,14 @@
+{
+  "projectname": "wechat-bind-app",
+  "description": "A WeChat Mini Program for binding WeChat accounts.",
+  "appid": "",
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "preloadRule": [],
+    "packNpm": false
+  },
+  "compileType": "miniprogram"
+}

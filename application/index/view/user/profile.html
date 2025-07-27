@@ -203,9 +203,7 @@
         <div class="qr-content">
             <span class="close-btn" onclick="closeQRModal()">&times;</span>
             <div class="qr-title">请用小程序扫码绑定</div>
-            <div id="qrCode" class="qr-code">
-                <!-- 二维码将在这里显示 -->
-            </div>
+            <div id="qrCode" class="qr-code"></div>
             <div class="qr-tips">
                 <p>1. 打开微信小程序</p>
                 <p>2. 进入"我的"页面</p>
@@ -223,6 +221,7 @@
     </div>
     
     <script src="/assets/js/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
         let bindToken = '';
         let bindTimer = null;
@@ -250,8 +249,12 @@
         
         // 显示二维码弹窗
         function showQRModal(qrContent) {
-            // 这里应该使用二维码生成库，暂时显示文本
-            $('#qrCode').html('<p style="font-family: monospace; font-size: 12px;">' + qrContent + '</p>');
+            $('#qrCode').html('');
+            new QRCode(document.getElementById("qrCode"), {
+                text: qrContent,
+                width: 200,
+                height: 200
+            });
             $('#qrModal').show();
             $('#bindBtn').prop('disabled', false).text('重新生成');
         }

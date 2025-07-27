@@ -1,0 +1,375 @@
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+    .bind-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .status-success {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    
+    .status-warning {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    
+    .qr-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        border: 2px dashed #e5e7eb;
+        border-radius: 8px;
+        background-color: #f9fafb;
+    }
+</style>
+
+<div id="content-container" class="container">
+    <div class="row">
+        <div class="col-md-3">
+            {include file="common/sidenav" /}
+        </div>
+        <div class="col-md-9">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h2 class="page-header">
+                        微信绑定管理
+                        <a href="{:url('user/index')}" class="btn btn-default pull-right">
+                            <i class="fa fa-arrow-left"></i> 返回用户中心
+                        </a>
+                    </h2>
+
+                    <!-- 微信绑定状态 -->
+                    <div class="bind-card">
+                        <h4 class="mb-3">
+                            <i class="fa fa-wechat text-success"></i> 微信账号绑定
+                        </h4>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                {if condition="$user.wechat_openid"}
+                                    <div class="alert alert-success">
+                                        <i class="fa fa-check-circle"></i> 
+                                        <strong>已绑定微信账号</strong>
+                                        <span class="status-badge status-success ml-2">已绑定</span>
+                                    </div>
+                                    <p class="text-muted">
+                                        <i class="fa fa-info-circle"></i> 
+                                        您的账号已成功绑定微信，可以使用微信小程序进行登录和操作。
+                                    </p>
+                                    <button class="btn btn-warning" onclick="unbindWechat()">
+                                        <i class="fa fa-unlink"></i> 解绑微信
+                                    </button>
+                                {else}
+                                    <div class="alert alert-warning">
+                                        <i class="fa fa-exclamation-triangle"></i> 
+                                        <strong>未绑定微信账号</strong>
+                                        <span class="status-badge status-warning ml-2">未绑定</span>
+                                    </div>
+                                    <p class="text-muted">
+                                        <i class="fa fa-info-circle"></i> 
+                                        绑定微信后，您可以使用微信小程序扫码登录，享受更便捷的操作体验。
+                                    </p>
+                                    <button class="btn btn-success" onclick="generateQrCode()">
+                                        <i class="fa fa-qrcode"></i> 生成绑定二维码
+                                    </button>
+                                {/if}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 员工号绑定状态 -->
+                    <div class="bind-card">
+                        <h4 class="mb-3">
+                            <i class="fa fa-id-card text-primary"></i> 员工号绑定
+                        </h4>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                {if condition="$user.employee_no"}
+                                    <div class="alert alert-success">
+                                        <i class="fa fa-check-circle"></i> 
+                                        <strong>已绑定员工号：{$user.employee_no}</strong>
+                                        <span class="status-badge status-success ml-2">已绑定</span>
+                                    </div>
+                                    <p class="text-muted">
+                                        <i class="fa fa-info-circle"></i> 
+                                        您的账号已绑定员工号，可以进行工作相关的操作。
+                                    </p>
+                                    <button class="btn btn-warning" onclick="unbindEmployee()">
+                                        <i class="fa fa-unlink"></i> 解绑员工号
+                                    </button>
+                                {else}
+                                    <div class="alert alert-warning">
+                                        <i class="fa fa-exclamation-triangle"></i> 
+                                        <strong>未绑定员工号</strong>
+                                        <span class="status-badge status-warning ml-2">未绑定</span>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="employee_no">员工号</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="employee_no" placeholder="请输入您的员工号">
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-primary" onclick="bindEmployee()">
+                                                    <i class="fa fa-link"></i> 绑定
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                {/if}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 二维码显示区域 -->
+                    <div class="bind-card" id="qr-section" style="display: none;">
+                        <h4 class="mb-3">
+                            <i class="fa fa-qrcode text-info"></i> 微信绑定二维码
+                        </h4>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="qr-container">
+                                    <div id="qrcode"></div>
+                                    <p class="text-center text-muted mt-3">
+                                        <i class="fa fa-mobile"></i> 
+                                        请使用微信小程序扫描上方二维码进行绑定
+                                    </p>
+                                    <p class="text-center text-warning">
+                                        <i class="fa fa-clock-o"></i> 
+                                        二维码有效期：<span id="countdown">5:00</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-info">
+                                    <h5><i class="fa fa-lightbulb-o"></i> 绑定步骤：</h5>
+                                    <ol>
+                                        <li>打开微信小程序</li>
+                                        <li>扫描左侧二维码</li>
+                                        <li>在小程序中确认绑定</li>
+                                        <li>绑定成功后页面会自动刷新</li>
+                                    </ol>
+                                </div>
+                                <button class="btn btn-default" onclick="refreshQrCode()">
+                                    <i class="fa fa-refresh"></i> 刷新二维码
+                                </button>
+                                <button class="btn btn-secondary" onclick="hideQrCode()">
+                                    <i class="fa fa-times"></i> 取消绑定
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let countdownTimer;
+let bindCheckTimer;
+
+// 生成二维码
+function generateQrCode() {
+    $.ajax({
+        url: '{:url("user/generateWechatQr")}',
+        type: 'POST',
+        dataType: 'json',
+        success: function(response) {
+            if (response.code === 1) {
+                const data = response.data;
+                
+                // 清空之前的二维码
+                document.getElementById('qrcode').innerHTML = '';
+                
+                // 使用qrcodejs库生成二维码
+                new QRCode(document.getElementById('qrcode'), {
+                    text: data.qr_url,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                
+                // 显示二维码区域
+                document.getElementById('qr-section').style.display = 'block';
+                
+                // 开始倒计时
+                startCountdown(300); // 5分钟
+                
+                // 开始检查绑定状态
+                startBindCheck(data.bind_code);
+                
+            } else {
+                layer.msg(response.msg || '生成二维码失败', {icon: 2});
+            }
+        },
+        error: function() {
+            layer.msg('网络错误', {icon: 2});
+        }
+    });
+}
+
+// 开始倒计时
+function startCountdown(seconds) {
+    clearInterval(countdownTimer);
+    
+    countdownTimer = setInterval(function() {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        const display = minutes + ':' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds;
+        
+        document.getElementById('countdown').textContent = display;
+        
+        if (seconds <= 0) {
+            clearInterval(countdownTimer);
+            document.getElementById('countdown').textContent = '已过期';
+            layer.msg('二维码已过期，请重新生成', {icon: 3});
+        }
+        
+        seconds--;
+    }, 1000);
+}
+
+// 开始检查绑定状态
+function startBindCheck(bindCode) {
+    clearInterval(bindCheckTimer);
+    
+    bindCheckTimer = setInterval(function() {
+        // 这里可以通过AJAX检查绑定状态
+        // 如果绑定成功，刷新页面
+        checkBindStatus(bindCode);
+    }, 2000);
+}
+
+// 检查绑定状态
+function checkBindStatus(bindCode) {
+    // 这里可以实现检查绑定状态的逻辑
+    // 暂时省略，实际使用时可以通过AJAX轮询检查
+}
+
+// 刷新二维码
+function refreshQrCode() {
+    clearInterval(countdownTimer);
+    clearInterval(bindCheckTimer);
+    generateQrCode();
+}
+
+// 隐藏二维码
+function hideQrCode() {
+    clearInterval(countdownTimer);
+    clearInterval(bindCheckTimer);
+    document.getElementById('qr-section').style.display = 'none';
+}
+
+// 解绑微信
+function unbindWechat() {
+    layer.confirm('确定要解绑微信账号吗？', {
+        btn: ['确定', '取消']
+    }, function(index) {
+        $.ajax({
+            url: '{:url("user/unbindWechat")}',
+            type: 'POST',
+            dataType: 'json',
+            success: function(response) {
+                if (response.code === 1) {
+                    layer.msg('解绑成功', {icon: 1});
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    layer.msg(response.msg || '解绑失败', {icon: 2});
+                }
+            },
+            error: function() {
+                layer.msg('网络错误', {icon: 2});
+            }
+        });
+        layer.close(index);
+    });
+}
+
+// 绑定员工号
+function bindEmployee() {
+    const employeeNo = document.getElementById('employee_no').value.trim();
+    
+    if (!employeeNo) {
+        layer.msg('请输入员工号', {icon: 3});
+        return;
+    }
+    
+    $.ajax({
+        url: '{:url("user/bindEmployee")}',
+        type: 'POST',
+        data: {
+            employee_no: employeeNo
+        },
+        dataType: 'json',
+        success: function(response) {
+            if (response.code === 1) {
+                layer.msg('绑定成功', {icon: 1});
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            } else {
+                layer.msg(response.msg || '绑定失败', {icon: 2});
+            }
+        },
+        error: function() {
+            layer.msg('网络错误', {icon: 2});
+        }
+    });
+}
+
+// 解绑员工号
+function unbindEmployee() {
+    layer.confirm('确定要解绑员工号吗？', {
+        btn: ['确定', '取消']
+    }, function(index) {
+        $.ajax({
+            url: '{:url("user/unbindEmployee")}',
+            type: 'POST',
+            dataType: 'json',
+            success: function(response) {
+                if (response.code === 1) {
+                    layer.msg('解绑成功', {icon: 1});
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    layer.msg(response.msg || '解绑失败', {icon: 2});
+                }
+            },
+            error: function() {
+                layer.msg('网络错误', {icon: 2});
+            }
+        });
+        layer.close(index);
+    });
+}
+
+// 页面卸载时清理定时器
+window.addEventListener('beforeunload', function() {
+    clearInterval(countdownTimer);
+    clearInterval(bindCheckTimer);
+});
+</script>

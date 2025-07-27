@@ -1,28 +1,24 @@
 Page({
   data: {
+    openid: '',
+    loading: false,
+    bindMethod: 'scan', // Default to scan method
     employees: [],
     selectedIndex: null,
-    password: '',
-    loading: false,
-    openid: '',
-    bindMethod: 'scan' // 默认使用扫码绑定
+    password: ''
   },
 
   onLoad() {
-    console.log('进入绑定页面 onLoad');
     const userInfo = wx.getStorageSync('userInfo');
-    console.log('bind页面 onLoad userInfo:', userInfo);
     this.setData({ openid: userInfo && userInfo.openid ? userInfo.openid : '' });
     this.loadEmployees();
   },
 
-  // 加载员工列表
   loadEmployees() {
     const app = getApp();
     wx.request({
       url: app.globalData.apiUrl + 'user/employee_list',
       success: res => {
-        console.log('员工列表接口返回:', res.data);
         if (res.data.code === 0) {
           this.setData({ employees: res.data.data });
         } else {
@@ -35,13 +31,11 @@ Page({
     });
   },
 
-  // 切换绑定方式
   switchMethod(e) {
     const method = e.currentTarget.dataset.method;
     this.setData({ bindMethod: method });
   },
 
-  // 扫码绑定
   scanQRCode() {
     const openid = this.data.openid;
     if (!openid) {
@@ -58,10 +52,8 @@ Page({
     });
   },
 
-  // 处理扫码结果
   handleScanResult(result) {
     try {
-      // 支持二维码内容为 bind:username:password
       if (result.startsWith('bind:')) {
         const parts = result.split(':');
         if (parts.length >= 3) {
@@ -80,7 +72,6 @@ Page({
     }
   },
 
-  // 使用凭据绑定（扫码和手动都走这里）
   bindWithCredentials(username, password) {
     const openid = this.data.openid;
     const app = getApp();
@@ -110,7 +101,6 @@ Page({
     });
   },
 
-  // 手动绑定相关方法
   onEmployeeChange(e) {
     this.setData({ selectedIndex: e.detail.value });
   },

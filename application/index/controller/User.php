@@ -382,4 +382,283 @@ class User extends Frontend
         $this->view->assign("mimetypeList", \app\common\model\Attachment::getMimetypeList());
         return $this->view->fetch();
     }
+
+    /**
+     * 微信绑定页面
+     */
+    public function wechatbind()
+    {
+        if (!$this->auth->isLogin()) {
+            $this->redirect('index/user/login');
+        }
+        
+        $user = $this->auth->getUser();
+        
+        $this->view->assign([
+            'user' => $user,
+            'title' => '微信绑定'
+        ]);
+        
+        return $this->view->fetch();
+    }
+
+    /**
+     * 生成微信绑定二维码
+     */
+    public function generateWechatQr()
+    {
+        try {
+            if (!$this->auth->isLogin()) {
+                $this->error('请先登录');
+            }
+            
+            $user = $this->auth->getUser();
+            
+            // 添加类型检查和调试
+            if (!$user || !isset($user->id)) {
+                $this->error('用户信息获取失败');
+            }
+            
+            // 确保用户ID是数字
+            $userId = (int)$user->id;
+            if ($userId <= 0) {
+                $this->error('用户ID无效');
+            }
+            
+            // 生成绑定码（临时标识）
+            $bindCode = md5($userId . time() . rand(1000, 9999));
+            
+            // 将绑定码存储到缓存中，有效期5分钟
+            $cacheKey = 'wechat_bind_' . $bindCode;
+            cache($cacheKey, $userId, 300);
+            
+            // 生成小程序码的参数
+            $scene = 'bind=' . $bindCode;
+            
+            // 简化URL生成，避免复杂调用
+            $baseUrl = 'https://order.023ent.net';
+            $qrUrl = $baseUrl . '/index/user/wechatBindCallback?code=' . $bindCode;
+            
+            // 构建返回数据
+            $data = [
+                'bind_code' => $bindCode,
+                'qr_url' => $qrUrl,
+                'scene' => $scene
+            ];
+            
+            // 使用JSON直接输出，避免框架方法
+            header('Content-Type: application/json');
+            echo json_encode([
+                'code' => 1,
+                'msg' => '生成成功',
+                'data' => $data
+            ]);
+            exit;
+            
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'code' => 0,
+                'msg' => '错误: ' . $e->getMessage()
+            ]);
+            exit;
+        }
+    }
+
+    /**
+     * 微信绑定回调
+     */
+    public function wechatBindCallback()
+    {
+        $code = $this->request->param('code');
+        
+        if (!$code) {
+            $this->error('参数错误');
+        }
+        
+        // 从缓存中获取用户ID
+        $userId = cache('wechat_bind_' . $code);
+        
+        if (!$userId) {
+            $this->error('绑定码已过期或无效');
+        }
+        
+        $this->view->assign([
+            'bind_code' => $code,
+            'title' => '微信绑定确认'
+        ]);
+        
+        return $this->view->fetch();
+    }
+
+    /**
+     * 处理微信绑定
+     */
+    public function doWechatBind()
+    {
+        if (!$this->request->isPost()) {
+            $this->error('请求方式错误');
+        }
+        
+        $bindCode = $this->request->post('bind_code');
+        $openid = $this->request->post('openid');
+        $userInfo = $this->request->post('user_info');
+        
+        if (!$bindCode || !$openid) {
+            $this->error('参数错误');
+        }
+        
+        // 从缓存中获取用户ID
+        $userId = cache('wechat_bind_' . $bindCode);
+        
+        if (!$userId) {
+            $this->error('绑定码已过期或无效');
+        }
+        
+        // 检查openid是否已被其他用户绑定
+        $existUser = \app\common\model\User::where('wechat_openid', $openid)
+                                          ->where('id', '<>', $userId)
+                                          ->find();
+        
+        if ($existUser) {
+            $this->error('该微信号已被其他用户绑定');
+        }
+        
+        // 更新用户微信信息
+        $user = \app\common\model\User::get($userId);
+        if (!$user) {
+            $this->error('用户不存在');
+        }
+        
+        $updateData = [
+            'wechat_openid' => $openid,
+            'updatetime' => time()
+        ];
+        
+        // 如果有用户信息，也更新头像和昵称
+        if ($userInfo) {
+            $userInfoArray = json_decode($userInfo, true);
+            if ($userInfoArray) {
+                if (isset($userInfoArray['avatarUrl'])) {
+                    $updateData['avatar'] = $userInfoArray['avatarUrl'];
+                }
+                if (isset($userInfoArray['nickName']) && empty($user->nickname)) {
+                    $updateData['nickname'] = $userInfoArray['nickName'];
+                }
+            }
+        }
+        
+        $result = $user->save($updateData);
+        
+        if ($result) {
+            // 清除缓存
+            cache('wechat_bind_' . $bindCode, null);
+            $this->success('绑定成功');
+        } else {
+            $this->error('绑定失败');
+        }
+    }
+
+    /**
+     * 解绑微信
+     */
+    public function unbindWechat()
+    {
+        if (!$this->auth->isLogin()) {
+            $this->error('请先登录');
+        }
+        
+        if (!$this->request->isPost()) {
+            $this->error('请求方式错误');
+        }
+        
+        $user = $this->auth->getUser();
+        
+        $result = $user->save([
+            'wechat_openid' => '',
+            'wechat_session_key' => '',
+            'updatetime' => time()
+        ]);
+        
+        if ($result) {
+            $this->success('解绑成功');
+        } else {
+            $this->error('解绑失败');
+        }
+    }
+
+    /**
+     * 绑定员工号
+     */
+    public function bindEmployee()
+    {
+        if (!$this->auth->isLogin()) {
+            $this->error('请先登录');
+        }
+        
+        if (!$this->request->isPost()) {
+            $this->error('请求方式错误');
+        }
+        
+        $employeeNo = $this->request->post('employee_no');
+        
+        if (!$employeeNo) {
+            $this->error('请输入员工号');
+        }
+        
+        $user = $this->auth->getUser();
+        
+        // 检查员工号是否已被其他用户绑定
+        $existUser = \app\common\model\User::where('employee_no', $employeeNo)
+                                          ->where('id', '<>', $user->id)
+                                          ->find();
+        
+        if ($existUser) {
+            $this->error('该员工号已被其他用户绑定');
+        }
+        
+        // 这里可以添加员工号验证逻辑
+        // $employee = Db::name('employee')->where('employee_no', $employeeNo)->find();
+        // if (!$employee) {
+        //     $this->error('员工号不存在');
+        // }
+        
+        $result = $user->save([
+            'employee_no' => $employeeNo,
+            'updatetime' => time()
+        ]);
+        
+        if ($result) {
+            $this->success('绑定成功');
+        } else {
+            $this->error('绑定失败');
+        }
+    }
+
+    /**
+     * 解绑员工号
+     */
+    public function unbindEmployee()
+    {
+        if (!$this->auth->isLogin()) {
+            $this->error('请先登录');
+        }
+        
+        if (!$this->request->isPost()) {
+            $this->error('请求方式错误');
+        }
+        
+        $user = $this->auth->getUser();
+        
+        $result = $user->save([
+            'employee_no' => '',
+            'updatetime' => time()
+        ]);
+        
+        if ($result) {
+            $this->success('解绑成功');
+        } else {
+            $this->error('解绑失败');
+        }
+    }
 }

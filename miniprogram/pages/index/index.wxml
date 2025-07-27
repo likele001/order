@@ -11,15 +11,9 @@
       </view>
     </view>
     
-    <!-- 绑定状态 -->
-    <view class="bind-status" wx:if="{{user.group_id === 0}}">
-      <text class="bind-tip">请绑定员工账号以使用完整功能</text>
-      <button class="bind-btn" bindtap="goBind">绑定员工账号</button>
-    </view>
-    
-    <view class="bind-status" wx:elif="{{user.group_id === 2}}">
-      <text class="bind-tip">已绑定员工账号</text>
-      <button class="unbind-btn" bindtap="unbindAccount">解绑账号</button>
+    <!-- 绑定入口按钮 -->
+    <view class="bind-actions">
+      <button class="bind-btn" bindtap="goBind">绑定微信账号</button>
     </view>
   </view>
 

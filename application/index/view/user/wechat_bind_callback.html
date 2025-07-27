@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信绑定确认</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .icon {
+            width: 80px;
+            height: 80px;
+            background: #07c160;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 36px;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .bind-code {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 30px;
+            word-break: break-all;
+        }
+        
+        .instructions {
+            text-align: left;
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 30px;
+        }
+        
+        .instructions h4 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .status.waiting {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.expired {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn.secondary {
+            background: #6c757d;
+        }
+        
+        .btn.secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">📱</div>
+        <div class="title">微信绑定确认</div>
+        <div class="subtitle">请在微信小程序中完成绑定操作</div>
+        
+        <div class="bind-code">
+            绑定码：{$bind_code}
+        </div>
+        
+        <div class="instructions">
+            <h4>📋 绑定步骤：</h4>
+            <ol>
+                <li>打开微信小程序</li>
+                <li>扫描此页面的二维码或手动输入绑定码</li>
+                <li>在小程序中确认绑定操作</li>
+                <li>绑定成功后此页面会自动更新</li>
+            </ol>
+        </div>
+        
+        <div id="status" class="status waiting">
+            <div class="loading"></div>
+            等待小程序确认绑定...
+        </div>
+        
+        <div>
+            <button class="btn" onclick="checkStatus()">检查状态</button>
+            <a href="{:url('user/wechatbind')}" class="btn secondary">返回绑定页面</a>
+        </div>
+    </div>
+
+    <script>
+        let checkTimer;
+        const bindCode = '{$bind_code}';
+        
+        // 开始检查绑定状态
+        function startStatusCheck() {
+            checkTimer = setInterval(checkStatus, 2000);
+        }
+        
+        // 检查绑定状态
+        function checkStatus() {
+            fetch('/index/user/checkBindStatus?bind_code=' + bindCode)
+                .then(response => response.json())
+                .then(data => {
+                    const statusDiv = document.getElementById('status');
+                    
+                    if (data.code === 1) {
+                        const status = data.data.status;
+                        
+                        if (status === 'success') {
+                            statusDiv.className = 'status success';
+                            statusDiv.innerHTML = '✅ 绑定成功！页面即将跳转...';
+                            clearInterval(checkTimer);
+                            
+                            setTimeout(() => {
+                                window.location.href = '/index/user/wechatbind';
+                            }, 2000);
+                            
+                        } else if (status === 'expired') {
+                            statusDiv.className = 'status expired';
+                            statusDiv.innerHTML = '❌ 绑定码已过期，请重新生成';
+                            clearInterval(checkTimer);
+                            
+                        } else {
+                            statusDiv.className = 'status waiting';
+                            statusDiv.innerHTML = '<div class="loading"></div>等待小程序确认绑定...';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('检查状态失败:', error);
+                });
+        }
+        
+        // 页面加载时开始检查
+        document.addEventListener('DOMContentLoaded', function() {
+            startStatusCheck();
+        });
+        
+        // 页面卸载时清理定时器
+        window.addEventListener('beforeunload', function() {
+            if (checkTimer) {
+                clearInterval(checkTimer);
+            }
+        });
+    </script>
+</body>
+</html>

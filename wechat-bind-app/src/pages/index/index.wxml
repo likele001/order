@@ -1,0 +1,9 @@
+<view class="container">
+  <view class="user-card">
+    <view class="user-info">
+      <text class="username">欢迎使用微信绑定小程序</text>
+      <text class="user-status">请绑定您的微信账号以使用完整功能</text>
+    </view>
+    <button class="bind-btn" bindtap="goBind">绑定微信账号</button>
+  </view>
+</view>

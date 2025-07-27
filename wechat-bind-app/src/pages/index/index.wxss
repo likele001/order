@@ -1,0 +1,55 @@
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0;
+}
+
+.user-card {
+  background: rgba(255, 255, 255, 0.95);
+  margin: 30rpx;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 60rpx;
+  margin-right: 24rpx;
+  background: #f0f0f0;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.username {
+  font-size: 36rpx;
+  font-weight: bold;
+}
+
+.bind-status {
+  margin-top: 20rpx;
+  text-align: center;
+}
+
+.bind-tip {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.bind-btn {
+  margin-top: 20rpx;
+  background-color: #4A90E2;
+  color: white;
+  border-radius: 8rpx;
+  padding: 10rpx 20rpx;
+}

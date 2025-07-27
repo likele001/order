@@ -1,0 +1,21 @@
+<view class="container">
+  <view class="header">
+    <text class="title">绑定微信账号</text>
+    <text class="subtitle">请绑定您的微信账号以实现直接登录</text>
+  </view>
+
+  <view class="form-group">
+    <input class="weui-input" placeholder="请输入微信账号" bindinput="onAccountInput" />
+  </view>
+  
+  <view class="form-group">
+    <input class="weui-input" placeholder="请输入密码" password="true" bindinput="onPasswordInput" />
+  </view>
+  
+  <button class="weui-btn weui-btn_primary" bindtap="bindAccount">绑定账号</button>
+
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">绑定中...</text>
+  </view>
+</view>
