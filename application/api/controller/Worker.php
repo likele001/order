@@ -229,7 +229,10 @@ class Worker extends Api
                 ->where('report_id', $record['id'])
                 ->field('image_url')
                 ->select();
-            $record['images'] = array_column($images, 'image_url');
+            // 为图片URL添加完整域名前缀
+            $record['images'] = array_map(function($img) {
+                return 'https://order.023ent.net' . $img['image_url'];
+            }, $images);
         }
         
         $this->success('获取成功', $records);

@@ -1,72 +1,46 @@
-<div class="panel panel-default panel-intro">
-    {:build_heading()}
+{include file="common/header" /}
 
+<div class="panel panel-default panel-intro">
+    <div class="panel-heading">
+        <h3 class="panel-title">生成绑定二维码</h3>
+        <p class="panel-tips">为员工生成微信小程序绑定二维码</p>
+    </div>
+    
     <div class="panel-body">
         <div class="row">
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">生成绑定二维码</h3>
-                    </div>
-                    <div class="panel-body">
-                        <form id="qr-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
-                            <div class="form-group">
-                                <label class="control-label col-xs-12 col-sm-2">选择员工:</label>
-                                <div class="col-xs-12 col-sm-8">
-                                    <select name="user_id" class="form-control" required>
-                                        <option value="">请选择员工</option>
-                                        {foreach $employees as $employee}
-                                        <option value="{$employee.id}">{$employee.nickname} ({$employee.username})</option>
-                                        {/foreach}
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="control-label col-xs-12 col-sm-2">员工密码:</label>
-                                <div class="col-xs-12 col-sm-8">
-                                    <input type="password" name="password" class="form-control" placeholder="请输入员工密码" required>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group layer-footer">
-                                <label class="control-label col-xs-12 col-sm-2"></label>
-                                <div class="col-xs-12 col-sm-8">
-                                    <button type="submit" class="btn btn-success btn-embossed">生成二维码</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+                <div class="form-group">
+                    <label class="control-label">选择员工</label>
+                    <select class="form-control" id="username" name="username">
+                        <option value="">请选择员工</option>
+                        {foreach $employees as $employee}
+                        <option value="{$employee.username}">{$employee.nickname} ({$employee.username})</option>
+                        {/foreach}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="control-label">员工密码</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="请输入员工密码">
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" class="btn btn-primary" id="generateBtn">
+                        <i class="fa fa-qrcode"></i> 生成二维码
+                    </button>
                 </div>
             </div>
             
             <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">二维码结果</h3>
-                    </div>
-                    <div class="panel-body">
-                        <div id="qr-result" style="display: none;">
-                            <div class="alert alert-info">
-                                <strong>员工信息:</strong> <span id="employee-info"></span>
-                            </div>
-                            <div class="form-group">
-                                <label>二维码内容:</label>
-                                <textarea id="qr-content" class="form-control" rows="3" readonly></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>使用说明:</label>
-                                <div class="alert alert-warning">
-                                    <p>1. 复制上面的二维码内容</p>
-                                    <p>2. 使用在线二维码生成工具生成二维码</p>
-                                    <p>3. 让员工扫描二维码完成绑定</p>
-                                    <p>4. 二维码有效期为5分钟</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="qr-placeholder" class="text-center text-muted">
-                            <i class="fa fa-qrcode fa-3x"></i>
-                            <p>请选择员工并输入密码生成二维码</p>
+                <div class="qr-result" id="qrResult" style="display: none;">
+                    <h4>绑定二维码</h4>
+                    <div class="text-center">
+                        <div id="qrCode"></div>
+                        <p class="help-block">员工使用微信小程序扫描此二维码即可完成绑定</p>
+                        <div class="alert alert-info">
+                            <strong>绑定信息：</strong><br>
+                            员工：<span id="bindUsername"></span><br>
+                            姓名：<span id="bindNickname"></span>
                         </div>
                     </div>
                 </div>
@@ -75,23 +49,100 @@
     </div>
 </div>
 
+<!-- 二维码显示模态框 -->
+<div class="modal fade" id="qrModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                <h4 class="modal-title">绑定二维码</h4>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qrCodeModal"></div>
+                <p class="help-block">员工使用微信小程序扫描此二维码即可完成绑定</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
 $(function() {
-    $('#qr-form').on('submit', function(e) {
-        e.preventDefault();
+    var qrCode = null;
+    
+    $('#generateBtn').click(function() {
+        var username = $('#username').val();
+        var password = $('#password').val();
         
-        var formData = $(this).serialize();
+        if (!username) {
+            Toastr.error('请选择员工');
+            return;
+        }
         
-        $.post('', formData, function(data) {
+        if (!password) {
+            Toastr.error('请输入密码');
+            return;
+        }
+        
+        var btn = $(this);
+        var originalText = btn.html();
+        btn.html('<i class="fa fa-spinner fa-spin"></i> 生成中...').prop('disabled', true);
+        
+        $.post('{:url("user/generate_qr")}', {
+            username: username,
+            password: password
+        }, function(data) {
             if (data.code === 1) {
-                $('#qr-result').show();
-                $('#qr-placeholder').hide();
-                $('#employee-info').text(data.data.nickname + ' (' + data.data.username + ')');
-                $('#qr-content').val(data.data.qr_content);
+                showQRCode(data.data.qr_content, data.data.username, data.data.nickname);
+                btn.html(originalText).prop('disabled', false);
             } else {
-                Toastr.error(data.msg);
+                Toastr.error(data.msg || '生成失败');
+                btn.html(originalText).prop('disabled', false);
             }
+        }).fail(function() {
+            Toastr.error('网络错误');
+            btn.html(originalText).prop('disabled', false);
         });
     });
+    
+    function showQRCode(qrContent, username, nickname) {
+        // 清除之前的二维码
+        if (qrCode) {
+            qrCode.clear();
+        }
+        
+        // 生成新二维码
+        qrCode = new QRCode(document.getElementById("qrCode"), {
+            text: qrContent,
+            width: 200,
+            height: 200,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+        
+        // 显示结果
+        $('#bindUsername').text(username);
+        $('#bindNickname').text(nickname);
+        $('#qrResult').show();
+        
+        // 显示模态框
+        $('#qrModal').modal('show');
+        
+        // 在模态框中显示二维码
+        var qrCodeModal = new QRCode(document.getElementById("qrCodeModal"), {
+            text: qrContent,
+            width: 300,
+            height: 300,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
 });
-</script> 
+</script>
+
+{include file="common/footer" /} 

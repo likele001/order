@@ -1,9 +1,52 @@
 <view class="container">
-  <view class="form-group">
-    <input class="weui-input" placeholder="账号/手机号" bindinput="onUsernameInput" value="{{username}}" />
+  <view class="header">
+    <text class="title">员工登录</text>
+    <text class="subtitle">请使用微信登录并绑定员工账号</text>
   </view>
-  <view class="form-group">
-    <input class="weui-input" placeholder="密码" password="true" bindinput="onPasswordInput" value="{{password}}" />
+
+  <!-- 未登录状态 -->
+  <view class="login-section" wx:if="{{!isLoggedIn}}">
+    <button class="login-btn wechat-btn" bindtap="wechatLogin">
+      <text class="btn-icon">🔐</text>
+      <text class="btn-text">微信登录</text>
+    </button>
   </view>
-  <button class="weui-btn weui-btn_primary" loading="{{loading}}" bindtap="login">登录</button>
+
+  <!-- 已登录但未绑定状态 -->
+  <view class="bind-section" wx:if="{{isLoggedIn && !isBound}}">
+    <view class="bind-info">
+      <text class="bind-title">登录成功！</text>
+      <text class="bind-desc">请绑定您的员工账号以使用完整功能</text>
+    </view>
+    <button class="bind-btn" bindtap="goToBind">
+      <text class="btn-icon">🔗</text>
+      <text class="btn-text">绑定员工账号</text>
+    </button>
+  </view>
+
+  <!-- 已登录且已绑定状态 -->
+  <view class="user-section" wx:if="{{isLoggedIn && isBound}}">
+    <view class="user-info">
+      <text class="welcome-text">欢迎回来！</text>
+      <text class="user-name">{{userInfo.nickname || '员工'}}</text>
+    </view>
+    <button class="logout-btn" bindtap="logout">
+      <text class="btn-text">退出登录</text>
+    </button>
+  </view>
+
+  <!-- 已登录但未绑定状态 -->
+  <view class="user-section" wx:if="{{isLoggedIn && !isBound}}">
+    <view class="user-info">
+      <text class="welcome-text">微信登录成功！</text>
+      <text class="user-name">{{userInfo.nickname || '微信用户'}}</text>
+    </view>
+    <button class="bind-btn" bindtap="goToBind">
+      <text class="btn-icon">🔗</text>
+      <text class="btn-text">绑定员工账号</text>
+    </button>
+    <button class="logout-btn" bindtap="logout">
+      <text class="btn-text">退出登录</text>
+    </button>
+  </view>
 </view>

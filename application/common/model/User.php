@@ -11,6 +11,7 @@ use think\Model;
  * @method static mixed getByNickname($str) 通过昵称查询用户
  * @method static mixed getByMobile($str) 通过手机查询用户
  * @method static mixed getByEmail($str) 通过邮箱查询用户
+ * @method static mixed getByWechatOpenid($str) 通过微信openid查询用户
  */
 class User extends Model
 {
@@ -23,6 +24,12 @@ class User extends Model
     // 追加属性
     protected $append = [
         'url',
+    ];
+    
+    // 新增：添加微信相关字段的默认值设置
+    protected $insert = [
+        'wechat_openid' => '',
+        'wechat_unionid' => '',
     ];
 
     /**
@@ -151,5 +158,41 @@ class User extends Model
             }
         }
         return $level;
+    }
+    
+    /**
+     * 新增：通过openid查询用户
+     * @param string $openid
+     * @return User|null
+     */
+    public static function getByWechatOpenid($openid)
+    {
+        return self::where('wechat_openid', $openid)->find();
+    }
+    
+    /**
+     * 新增：绑定微信账号
+     * @param string $openid
+     * @param string $unionid
+     * @return bool
+     */
+    public function bindWechat($openid, $unionid = '')
+    {
+        $this->wechat_openid = $openid;
+        if (!empty($unionid)) {
+            $this->wechat_unionid = $unionid;
+        }
+        return $this->save();
+    }
+    
+    /**
+     * 新增：解除微信绑定
+     * @return bool
+     */
+    public function unbindWechat()
+    {
+        $this->wechat_openid = '';
+        $this->wechat_unionid = '';
+        return $this->save();
     }
 }

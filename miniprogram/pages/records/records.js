@@ -12,6 +12,13 @@ Page({
       wx.reLaunch({ url: '/pages/login/login' });
       return;
     }
+    
+    // 检查是否需要绑定
+    if (userInfo.group_id === 0) {
+      wx.reLaunch({ url: '/pages/login/bind' });
+      return;
+    }
+    
     this.setData({ loading: true });
     wx.request({
       url: app.globalData.apiUrl + 'worker/records',

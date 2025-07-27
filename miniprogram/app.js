@@ -1,6 +1,6 @@
 App({
   globalData: {
-    apiUrl: 'https://你的域名/api/',
+    apiUrl: 'https://order.023ent.net/api/',
     userInfo: null
   }
 });

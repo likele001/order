@@ -16,6 +16,12 @@ Page({
       return;
     }
     
+    // 检查是否需要绑定
+    if (userInfo.group_id === 0) {
+      wx.reLaunch({ url: '/pages/login/bind' });
+      return;
+    }
+    
     // 设置当前月份
     const now = new Date();
     const currentMonth = `${now.getFullYear()}年${String(now.getMonth() + 1).padStart(2, '0')}月`;

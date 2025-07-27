@@ -16,6 +16,12 @@ Page({
       return;
     }
     
+    // 检查是否需要绑定
+    if (userInfo.group_id === 0) {
+      wx.reLaunch({ url: '/pages/login/bind' });
+      return;
+    }
+    
     if (options.id) {
       this.setData({ loading: true });
       this.loadTask(options.id);

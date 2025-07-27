@@ -1,0 +1,66 @@
+{extend name="public/base" /}
+
+{block name="content"}
+<div class="layui-card">
+    <div class="layui-card-header">微信小程序绑定</div>
+    <div class="layui-card-body">
+        <div class="wechat-bind-container">
+            {if !empty($user.wechat_openid)}
+            <div class="bind-success">
+                <i class="layui-icon layui-icon-success" style="font-size: 50px; color: #009688;"></i>
+                <h3>已成功绑定微信账号</h3>
+                <p>OpenID: {php}echo substr($user['wechat_openid'], 0, 8) . '****' . substr($user['wechat_openid'], -8);{/php}</p>
+                <button class="layui-btn layui-btn-danger" id="unbindBtn">解除绑定</button>
+            </div>
+            {else /}
+            <div class="bind-guide">
+                <h3>请使用微信扫描下方二维码完成绑定</h3>
+                <div class="qrcode-container">
+                    <img src="https://picsum.photos/200/200" alt="微信绑定二维码" id="qrcode">
+                    <!-- 实际项目中应使用二维码生成库生成真实二维码 -->
+                </div>
+                <p class="tips">二维码有效期为5分钟，请尽快扫描</p>
+                <p class="status" id="bindStatus">等待扫描...</p>
+            </div>
+            {/if}
+        </div>
+    </div>
+</div>
+{/block}
+
+{block name="script"}
+<script>
+layui.use(['jquery'], function() {
+    var $ = layui.jquery;
+    
+    // 未绑定状态下轮询检查绑定结果
+    {if empty($user.wechat_openid)}
+    var checkInterval = setInterval(function() {
+        $.get("{:url('admin/UserBind/checkStatus')}", function(res) {
+            if (res.code == 0 && res.data) {
+                clearInterval(checkInterval);
+                $('#bindStatus').html('<span style="color: #009688;">绑定成功！即将刷新页面...</span>');
+                setTimeout(function() {
+                    location.reload();
+                }, 1500);
+            }
+        });
+    }, 3000);
+    {/if}
+    
+    // 解除绑定
+    $('#unbindBtn').click(function() {
+        if (confirm('确定要解除微信绑定吗？')) {
+            $.post("{:url('admin/UserBind/unbindWechat')}", function(res) {
+                layer.msg(res.msg);
+                if (res.code == 0) {
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                }
+            });
+        }
+    });
+});
+</script>
+{/block}

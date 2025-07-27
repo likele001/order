@@ -151,6 +151,25 @@
             color: #856404;
             border: 1px solid #ffeaa7;
         }
+        .bind-steps {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .bind-steps h4 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .bind-steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .bind-steps li {
+            margin-bottom: 8px;
+            color: #666;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -184,9 +203,19 @@
             </div>
             
             <div class="bind-section">
-                <div class="bind-title">绑定小程序</div>
+                <div class="bind-title">绑定微信小程序</div>
                 <div class="bind-desc">
-                    扫描二维码绑定微信小程序，可在手机上使用报工功能
+                    生成二维码，用微信小程序扫描即可绑定账号
+                </div>
+                
+                <div class="bind-steps">
+                    <h4>操作步骤：</h4>
+                    <ol>
+                        <li>点击下方"生成绑定二维码"按钮</li>
+                        <li>输入您的密码</li>
+                        <li>用微信小程序扫描生成的二维码</li>
+                        <li>完成绑定</li>
+                    </ol>
                 </div>
                 
                 <div id="bindStatus" class="bind-status" style="display: none;"></div>
@@ -206,45 +235,32 @@
             <div id="qrCode" class="qr-code"></div>
             <div class="qr-tips">
                 <p>1. 打开微信小程序</p>
-                <p>2. 进入"我的"页面</p>
+                <p>2. 点击"微信登录"</p>
                 <p>3. 点击"绑定员工账号"</p>
                 <p>4. 选择"扫码绑定"</p>
                 <p>5. 扫描此二维码完成绑定</p>
             </div>
-            <div id="bindProgress" style="display: none;">
-                <p>正在等待小程序扫码...</p>
-                <div class="progress-bar">
-                    <div class="progress-fill"></div>
-                </div>
-            </div>
+
         </div>
     </div>
     
     <script src="/assets/js/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
-        let bindToken = '';
-        let bindTimer = null;
         
         // 生成绑定二维码
         function generateBindQR() {
+            var password = prompt('请输入您的密码以生成绑定二维码：');
+            if (!password) {
+                return;
+            }
+            
             $('#bindBtn').prop('disabled', true).text('生成中...');
             
-            $.post('/api/user/generate_bind_token', {
-                // 这里需要传递登录token，实际项目中应该从cookie或session获取
-            }, function(res) {
-                if (res.code === 0) {
-                    bindToken = res.data.token;
-                    showQRModal(res.data.qr_content);
-                    startBindCheck();
-                } else {
-                    alert(res.msg || '生成失败');
-                    $('#bindBtn').prop('disabled', false).text('生成绑定二维码');
-                }
-            }).fail(function() {
-                alert('网络错误');
-                $('#bindBtn').prop('disabled', false).text('生成绑定二维码');
-            });
+            // 直接生成包含用户名和密码的二维码内容
+            var qrContent = 'bind:{$user.username}:' + password;
+            showQRModal(qrContent);
+            $('#bindBtn').prop('disabled', false).text('重新生成');
         }
         
         // 显示二维码弹窗
@@ -262,53 +278,6 @@
         // 关闭二维码弹窗
         function closeQRModal() {
             $('#qrModal').hide();
-            stopBindCheck();
-        }
-        
-        // 开始检查绑定状态
-        function startBindCheck() {
-            if (!bindToken) return;
-            
-            $('#bindProgress').show();
-            
-            bindTimer = setInterval(function() {
-                checkBindStatus();
-            }, 2000);
-        }
-        
-        // 停止检查绑定状态
-        function stopBindCheck() {
-            if (bindTimer) {
-                clearInterval(bindTimer);
-                bindTimer = null;
-            }
-            $('#bindProgress').hide();
-        }
-        
-        // 检查绑定状态
-        function checkBindStatus() {
-            $.get('/api/user/bind_status', { token: bindToken }, function(res) {
-                if (res.code === 0) {
-                    if (res.data.status === 1) {
-                        // 绑定成功
-                        stopBindCheck();
-                        showBindStatus('绑定成功！', 'success');
-                        setTimeout(function() {
-                            closeQRModal();
-                            location.reload();
-                        }, 2000);
-                    } else if (res.data.status === 2) {
-                        // 已过期
-                        stopBindCheck();
-                        showBindStatus('二维码已过期，请重新生成', 'error');
-                    }
-                }
-            });
-        }
-        
-        // 显示绑定状态
-        function showBindStatus(message, type) {
-            $('#bindStatus').removeClass('success error pending').addClass(type).text(message).show();
         }
         
         // 页面加载完成

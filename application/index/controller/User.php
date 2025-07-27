@@ -264,6 +264,11 @@ class User extends Frontend
      */
     public function profile()
     {
+        if (!$this->auth->isLogin()) {
+            $this->redirect('index/user/login?url=' . urlencode($this->request->url()));
+        }
+        $user = $this->auth->getUser();
+        $this->view->assign('user', $user);
         $this->view->assign('title', __('Profile'));
         return $this->view->fetch();
     }

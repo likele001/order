@@ -374,21 +374,52 @@ class User extends Api
         $openid = $this->request->post('openid');
         $account = $this->request->post('account');
         $password = $this->request->post('password');
+        
+        // 添加调试日志
+        file_put_contents('/tmp/bind_debug.log', date('Y-m-d H:i:s') . ' 绑定请求: ' . json_encode([
+            'openid' => $openid,
+            'account' => $account,
+            'password' => $password ? '***' : 'empty'
+        ]) . PHP_EOL, FILE_APPEND);
+        
         if (!$openid || !$account || !$password) {
             $this->error('参数不完整');
         }
         $user = \app\common\model\User::where('group_id', 2)->where(function($query) use ($account) {
             $query->where('username', $account)->whereOr('mobile', $account);
         })->find();
+        
+        // 添加调试日志
+        file_put_contents('/tmp/bind_debug.log', date('Y-m-d H:i:s') . ' 查找用户结果: ' . ($user ? json_encode(['id' => $user['id'], 'username' => $user['username'], 'group_id' => $user['group_id']]) : 'null') . PHP_EOL, FILE_APPEND);
+        
         if (!$user) {
             $this->error('员工账号不存在或不属于员工组');
         }
-        if ($user['password'] !== md5(md5($password) . $user['salt'])) {
+        
+        $inputPasswordHash = md5(md5($password) . $user['salt']);
+        $storedPasswordHash = $user['password'];
+        
+        // 添加调试日志
+        file_put_contents('/tmp/bind_debug.log', date('Y-m-d H:i:s') . ' 密码验证: ' . json_encode([
+            'input_hash' => $inputPasswordHash,
+            'stored_hash' => $storedPasswordHash,
+            'match' => $inputPasswordHash === $storedPasswordHash
+        ]) . PHP_EOL, FILE_APPEND);
+        
+        if ($inputPasswordHash !== $storedPasswordHash) {
             $this->error('密码错误');
         }
         // 绑定 openid
         $user->openid = $openid;
         $user->save();
+        
+        // 添加调试日志
+        file_put_contents('/tmp/bind_debug.log', date('Y-m-d H:i:s') . ' 绑定成功: ' . json_encode([
+            'user_id' => $user['id'],
+            'username' => $user['username'],
+            'openid' => $openid
+        ]) . PHP_EOL, FILE_APPEND);
+        
         // 标准token写入
         $this->auth->direct($user->id);
         $data = ['userinfo' => $this->auth->getUserinfo()];

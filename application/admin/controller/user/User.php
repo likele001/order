@@ -98,8 +98,59 @@ class User extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        Auth::instance()->delete($row['id']);
+        if ($row->group_id == 1) {
+            $this->error(__('Administrator group cannot be deleted'));
+        }
+        $row->delete();
         $this->success();
     }
 
+    /**
+     * 生成绑定二维码
+     */
+    public function generate_qr()
+    {
+        if ($this->request->isPost()) {
+            $username = $this->request->post('username');
+            $password = $this->request->post('password');
+            
+            if (!$username || !$password) {
+                $this->error('请选择员工并输入密码');
+            }
+            
+            // 验证员工账号
+            $user = \think\Db::name('user')
+                ->where('group_id', 2)
+                ->where(function($query) use ($username) {
+                    $query->where('username', $username)->whereOr('mobile', $username);
+                })
+                ->find();
+            
+            if (!$user) {
+                $this->error('员工账号不存在或不属于员工组');
+            }
+            
+            if ($user['password'] !== md5(md5($password) . $user['salt'])) {
+                $this->error('密码错误');
+            }
+            
+            // 生成绑定二维码内容
+            $qrContent = "bind:{$user['username']}:{$password}";
+            
+            $this->success('二维码生成成功', [
+                'qr_content' => $qrContent,
+                'username' => $user['username'],
+                'nickname' => $user['nickname']
+            ]);
+        }
+        
+        // 获取员工列表
+        $employees = \think\Db::name('user')
+            ->where('group_id', 2)
+            ->field('id,username,nickname,mobile')
+            ->select();
+        
+        $this->view->assign('employees', $employees);
+        return $this->view->fetch();
+    }
 }

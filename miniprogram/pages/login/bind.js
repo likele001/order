@@ -60,22 +60,26 @@ Page({
 
   // 处理扫码结果
   handleScanResult(result) {
+    console.log('扫码结果:', result);
     try {
       // 支持二维码内容为 bind:username:password
       if (result.startsWith('bind:')) {
         const parts = result.split(':');
+        console.log('解析的二维码内容:', parts);
         if (parts.length >= 3) {
           const username = parts[1];
           const password = parts[2];
+          console.log('用户名:', username, '密码:', password);
           this.setData({ loading: true });
           this.bindWithCredentials(username, password);
         } else {
-          wx.showToast({ title: '无效的绑定二维码', icon: 'none' });
+          wx.showToast({ title: '无效的绑定二维码格式', icon: 'none' });
         }
       } else {
         wx.showToast({ title: '无效的绑定二维码', icon: 'none' });
       }
     } catch (error) {
+      console.error('处理扫码结果错误:', error);
       wx.showToast({ title: '二维码格式错误', icon: 'none' });
     }
   },
@@ -84,6 +88,7 @@ Page({
   bindWithCredentials(username, password) {
     const openid = this.data.openid;
     const app = getApp();
+    console.log('开始绑定，参数:', { openid, username, password });
     this.setData({ loading: true });
     wx.request({
       url: app.globalData.apiUrl + 'user/bind_account',
@@ -94,6 +99,7 @@ Page({
         password: password
       },
       success: res => {
+        console.log('绑定接口返回:', res.data);
         if (res.data.code === 0) {
           wx.showToast({ title: '绑定成功', icon: 'success' });
           wx.setStorageSync('userInfo', res.data.data.userinfo);
@@ -103,7 +109,8 @@ Page({
           wx.showToast({ title: res.data.msg || '绑定失败', icon: 'none' });
         }
       },
-      fail: () => {
+      fail: err => {
+        console.error('绑定接口请求失败:', err);
         wx.showToast({ title: '网络错误', icon: 'none' });
       },
       complete: () => this.setData({ loading: false })
